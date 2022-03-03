@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Join from "./components/Join";
 
 function App() {
   const [serverStatus, setServerStatus] = useState("connecting to server...");
@@ -15,6 +16,7 @@ function App() {
   return (
     <>
       <p>Server status: {serverStatus}</p>
+      <Join/>
     </>
   );
 }

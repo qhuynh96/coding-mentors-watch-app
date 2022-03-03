@@ -1,18 +1,24 @@
 import axios from "axios"
 import { Dispatch } from "redux"
 import { ActionType } from "../action-types"
-import { RoomData } from "../reducers/roomReducer"
-export const createRoom = (userId: string) => async (dispatch: Dispatch) =>{
+import { RoomAction } from "../actions"
+
+export const createRoom = (userId: string) => async (dispatch: Dispatch<RoomAction>) =>{
    try {
        dispatch({
-           type: ActionType.CREATEROOMLOADING
+           type: ActionType.CREATEROOMLOADING,
+           payload: ""
        })
 
        const res = await axios.get("http://localhost:5000/watch-app")
+       dispatch({
+        type: ActionType.CREATEROOMSUCCESS,
+        payload: res.data
+    })
        console.log(res)
    } catch (err) {
        dispatch({
-           type: ActionType.CREATEROOMFAILURE
+           type: ActionType.CREATEROOMFAILURE,
        })
    }
 }

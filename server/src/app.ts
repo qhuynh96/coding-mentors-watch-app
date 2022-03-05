@@ -22,14 +22,8 @@ const io = socketio(server,{
     origin:"*"
   }
 })
-//Socket Connection
-io.on('connect', (socket: any)=>{
-  console.log('we have a new connection');
 
-  socket.on('disconnect',()=>{
-      console.log('user has left')
-  })
-})
+//Socket Connection
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -38,15 +32,22 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/watch-app", ((req, res) => {
+  io.on('connect', (socket: any)=>{
+    console.log('we have a new connection');
+  
+    socket.on('disconnect',()=>{
+        console.log('user has left')
+    })
+  })
   res.status(200).json({
     message: "Successfully connected to ExpressJS server!",
   });
-}) );
+}) as RequestHandler );
 
 // catch 404 and forward to error handler
 app.use(((req, res, next) => {
   next(createError(404));
-}) );
+}) as RequestHandler );
 
 // error handler
 app.use(((err, req, res, next) => {
@@ -57,6 +58,6 @@ app.use(((err, req, res, next) => {
   // render the error page
   res.status(err.status || 500);
   res.render("error");
-}) );
+}) as ErrorRequestHandler );
 
 module.exports = app;

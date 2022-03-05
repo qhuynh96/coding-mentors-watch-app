@@ -13,7 +13,7 @@ interface ServerToClientEvents {
     
 const Join = () => {
    
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("http://localhost:5000");
+    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("http://localhost:5000/watch-app");
     useEffect(()=>{
         console.log(socket)
     },[])

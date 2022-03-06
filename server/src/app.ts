@@ -1,17 +1,35 @@
 const createError = require("http-errors");
 const express = require("express");
 import { RequestHandler, ErrorRequestHandler } from "express";
+import { Server } from "socket.io";
 const path = require("path");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
+const { createServer } = require("http");
+
 const app = express();
+
 app.use(
   cors({
     origin: "*",
   })
 );
+
+// create http server
+const server = createServer(app);
+
+// create the socket io server on top of the http server
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+io.on("connection", () => {
+  console.log("a connection established");
+});
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -41,4 +59,4 @@ app.use(((err, req, res, next) => {
   res.render("error");
 }) as ErrorRequestHandler);
 
-module.exports = app;
+module.exports = { app: app, server: server };

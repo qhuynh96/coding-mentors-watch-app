@@ -1,14 +1,15 @@
 const createError = require("http-errors");
 const express = require("express");
 import { RequestHandler, ErrorRequestHandler } from "express";
+const socket =  require ("./socket.ts");
 const path = require("path");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const http = require('http')
-const socketio = require('socket.io')
-
+const {Server} = require('socket.io')
 const app = express();
+
 app.use(
   cors({
     origin: "*",
@@ -17,11 +18,12 @@ app.use(
 
 //Set up socket
 const server = http.createServer(app)
-const io = socketio(server,{
+const io = new Server(server,{
   cors: {
     origin:"*"
   }
 })
+socket({io})
 
 //Socket Connection
 
@@ -31,18 +33,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/watch-app", ((req, res) => {
-  io.on('connect', (socket: any)=>{
-    console.log('we have a new connection');
-  
-    socket.on('disconnect',()=>{
-        console.log('user has left')
-    })
-  })
+
+app.get("/watch-app", ((req, res) => { 
   res.status(200).json({
     message: "Successfully connected to ExpressJS server!",
   });
 }) as RequestHandler );
+
+io.on("connection", (socket: any) => {
+  console.log(socket)
+});
 
 // catch 404 and forward to error handler
 app.use(((req, res, next) => {

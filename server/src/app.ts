@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import createError from "http-errors";
 import express, { RequestHandler, ErrorRequestHandler } from "express";
 import { Server } from "socket.io";
@@ -5,6 +6,17 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+=======
+const createError = require("http-errors");
+const express = require("express");
+import { RequestHandler, ErrorRequestHandler } from "express";
+import { Server,Socket } from "socket.io";
+const {v4} = require('uuid')
+const path = require("path");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+>>>>>>> 7fb1b2f (create room socket at server)
 
 import { createServer } from "http";
 
@@ -26,9 +38,43 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", () => {
-  console.log("a connection established");
-});
+const rooms: Record<string, {name: string,admin: string}> = {}
+
+//Socket Events
+const EVENTS ={
+  connection: 'connection',
+  CLIENT: {
+      CREATE_ROOM: "CREATE_ROOM"
+  },
+  SERVER:{
+    ROOMS:'ROOMS',
+    JOINED_ROOM: 'JOINED_ROOM'
+  }
+}
+
+io.on(EVENTS.connection,(socket: Socket)=>{
+  console.log(`user connected ${socket.id}`)
+
+  socket.on(EVENTS.CLIENT.CREATE_ROOM, ({roomName,userId})=>{
+      console.log(({roomName}))
+  //create a roomId 
+  const roomId = v4()
+  //ad a new room to the room list 
+  rooms[roomId] = {
+    admin: userId,
+    name: roomName,
+  }
+  //join Room /
+  socket.join(roomId)
+  //broadcast an event saying there is a new room 
+  socket.broadcast.emit(EVENTS.SERVER.ROOMS, rooms)
+  //emit back to the room creator
+  socket.emit(EVENTS.SERVER.ROOMS, rooms)
+  //emit event back the room creator 
+  socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId)
+  })
+ 
+})
 
 app.use(logger("dev"));
 app.use(express.json());

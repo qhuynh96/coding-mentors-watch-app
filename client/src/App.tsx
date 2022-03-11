@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import HomePage from "./components/HomePage";
+import NewRoom from "./components/NewRoom";
 
 function App() {
   const socket = io("http://localhost:5000");
@@ -11,11 +13,13 @@ function App() {
       .then((res) => res.json())
       .then((res) => setServerStatus(res.message))
       .catch((error) => setServerStatus(error.message));
-  }, []);
+  });
 
   return (
     <>
       <p>Server status: {serverStatus}</p>
+      {/* <HomePage /> */}
+      <NewRoom />
     </>
   );
 }

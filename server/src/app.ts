@@ -1,13 +1,12 @@
-const createError = require("http-errors");
-const express = require("express");
-import { RequestHandler, ErrorRequestHandler } from "express";
+import createError from "http-errors";
+import express, { RequestHandler, ErrorRequestHandler } from "express";
 import { Server } from "socket.io";
-const path = require("path");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
+import path from "path";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
 
-const { createServer } = require("http");
+import { createServer } from "http";
 
 const app = express();
 

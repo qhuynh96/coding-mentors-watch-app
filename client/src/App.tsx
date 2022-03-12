@@ -19,7 +19,6 @@ function App({ socket }: SocketProps) {
     const roomId = v4()
     socket.emit(RoomEvent.CREATE_ROOM,(roomId: string)=>{
       socket.on(RoomEvent.CREATED_ROOM,(newRoom: RoomProps)=>{
-        console.log(newRoom)
       })
     })
   }

@@ -24,7 +24,6 @@ export const RoomsContextProvider: React.FC<React.ReactNode> = ({children}) =>{
     }
     //add new room
     const addNewRoom = (room: RoomProps): void =>{
-        console.log(room)
         setRooms([...rooms,room])
     }
     return (

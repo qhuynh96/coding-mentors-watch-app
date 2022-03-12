@@ -42,7 +42,7 @@ io.on(RoomEvent.connection, function (socket) {
     console.log("user connected ".concat(socket.id));
     var rooms = (0, rooms_1.getRooms)();
     console.log(rooms);
-    socket.emit(RoomEvent.SERVER_ROOMS, rooms);
+    socket.emit(RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
     /**Create New Room */
     socket.on(RoomEvent.CREATE_ROOM, function (_a) {
         var roomId = _a.roomId;

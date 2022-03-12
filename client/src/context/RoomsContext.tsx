@@ -9,21 +9,21 @@ export interface RoomProps {
 }
 
 interface RoomsContext {
-    rooms: RoomProps[] 
-    getRooms: (rooms: RoomProps[]) => void
-    addNewRoom: (room: RoomProps) => void
+    rooms?: RoomProps[] 
+    getRooms?: (rooms: RoomProps[]) => void
+    addNewRoom?: (room: RoomProps) => void
 }
 
-export const RoomsContext = createContext({} as RoomsContext)
+export const RoomsContext = createContext<RoomsContext >({})
 
 export const RoomsContextProvider: React.FC<React.ReactNode> = ({children}) =>{
     const [rooms,setRooms] = useState<RoomProps[]>([])
     //get rooms
-    const getRooms = (rooms: RoomProps[]): void =>{
+    const getRooms = (rooms: RoomProps[]):void =>{
         setRooms(rooms)
     }
     //add new room
-    const addNewRoom = (room: RoomProps): void =>{
+    const addNewRoom = (room: RoomProps):void =>{
         setRooms([...rooms,room])
     }
     return (

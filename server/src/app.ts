@@ -46,7 +46,7 @@ export enum RoomEvent  {
   console.log(`user connected ${socket.id}`)
   const rooms = getRooms()
   console.log(rooms)
-  socket.emit(RoomEvent.SERVER_ROOMS,rooms)
+  socket.emit(RoomEvent.SERVER_ROOMS,{rooms,userId:socket.id})
   /**Create New Room */
     socket.on(RoomEvent.CREATE_ROOM, ({roomId})=>{
     //add a new room to the room list 

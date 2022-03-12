@@ -1,34 +1,34 @@
+import { useContext } from "react";
 import { useState, useEffect } from "react";
 import {v4} from 'uuid'
-import { RoomProps, useRooms } from "./context/RoomsContext";
+import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
 import { RoomEvent, SocketProps } from "./interface";
 
 function App({ socket }: SocketProps) {
-  
+  const [userId,setUserId]= useState<string | null>(null)
   //Context
-  const {rooms,getRooms,addNewRoom} = useRooms()
+  const {rooms,getRooms,addNewRoom} = useContext(RoomsContext)
   //socket on
-  socket.on(RoomEvent.SERVER_ROOMS,rooms=>{    
-    //getRooms does not work but console.log work
+  socket.on(RoomEvent.SERVER_ROOMS,({rooms,userId})=>{    
+    setUserId(userId)
     getRooms && getRooms(rooms)
   })
+
   socket.on(RoomEvent.CREATED_ROOM,newRoom=>{
+    addNewRoom && addNewRoom(newRoom)
   })
   socket.on(RoomEvent.JOINED_ROOM,({userId,roomId})=>{
   })
   //create rooms
-  const createRoom = () =>{
+  const createRoom = ():void =>{
     const roomId = v4()
-    socket.emit(RoomEvent.CREATE_ROOM,roomId)
+    socket.emit(RoomEvent.CREATE_ROOM,{roomId})    
   }
   //join room
   const joinRoom = (roomId: string) =>{
-    socket.emit(RoomEvent.JOIN_ROOM,roomId)
+    socket.emit(RoomEvent.JOIN_ROOM,{roomId})
   }
-
-  console.log(rooms)
   
-
   const [serverStatus, setServerStatus] = useState("connecting to server...");
 
   useEffect(() => {

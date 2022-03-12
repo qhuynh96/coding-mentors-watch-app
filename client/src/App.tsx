@@ -17,9 +17,9 @@ function App() {
 
   return (
     <>
-      <p>Server status: {serverStatus}</p>
-      {/* <HomePage /> */}
-      <NewRoom />
+      {/* <p>Server status: {serverStatus}</p> */}
+      <HomePage />
+      {/* <NewRoom /> */}
     </>
   );
 }

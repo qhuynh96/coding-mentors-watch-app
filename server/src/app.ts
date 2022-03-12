@@ -9,8 +9,8 @@ import logger from "morgan";
 =======
 const createError = require("http-errors");
 const express = require("express");
-import { RequestHandler, ErrorRequestHandler } from "express";
-import { Server,Socket } from "socket.io";
+import {RequestHandler, ErrorRequestHandler} from "express"
+const { Server,Socket } = require('socket.io');
 const {v4} = require('uuid')
 const path = require("path");
 const cors = require("cors");
@@ -38,40 +38,33 @@ const io = new Server(server, {
   },
 });
 
-const rooms: Record<string, {name: string,admin: string}> = {}
+const rooms: Record<string, {members: string[],roomId: string}> = {}
 
 //Socket Events
-const EVENTS ={
-  connection: 'connection',
-  CLIENT: {
-      CREATE_ROOM: "CREATE_ROOM"
-  },
-  SERVER:{
-    ROOMS:'ROOMS',
-    JOINED_ROOM: 'JOINED_ROOM'
-  }
+export const enum RoomEvent {
+  CONNNECTION= 'CONNNECTION',
+  CREATE_ROOM="CREATE_ROOM",
+  JOIN_ROOM="JOIN_ROOM",
+  SEND_ROOM="SEND_ROOM"
 }
 
-io.on(EVENTS.connection,(socket: Socket)=>{
+io.on(RoomEvent.CONNNECTION,(socket: typeof Socket)=>{
   console.log(`user connected ${socket.id}`)
 
-  socket.on(EVENTS.CLIENT.CREATE_ROOM, ({roomName,userId})=>{
-      console.log(({roomName}))
-  //create a roomId 
-  const roomId = v4()
+  socket.on(RoomEvent.CREATE_ROOM, ({userId, roomId}: any)=>{
+    
   //ad a new room to the room list 
   rooms[roomId] = {
-    admin: userId,
-    name: roomName,
+    members:[userId],
+    roomId,
   }
   //join Room /
   socket.join(roomId)
   //broadcast an event saying there is a new room 
-  socket.broadcast.emit(EVENTS.SERVER.ROOMS, rooms)
+  socket.broadcast.emit(RoomEvent.SEND_ROOM, rooms)
   //emit back to the room creator
-  socket.emit(EVENTS.SERVER.ROOMS, rooms)
+  socket.emit(RoomEvent.SEND_ROOM, rooms)
   //emit event back the room creator 
-  socket.emit(EVENTS.SERVER.JOINED_ROOM, roomId)
   })
  
 })
@@ -102,6 +95,6 @@ app.use(((err, req, res, next) => {
   // render the error page
   res.status(err.status || 500);
   res.render("error");
-}) as ErrorRequestHandler);
+}) as  ErrorRequestHandler);
 
 module.exports = { app: app, server: server };

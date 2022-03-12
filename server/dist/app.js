@@ -53,6 +53,7 @@ io.on(RoomEvent.connection, function (socket) {
         socket.join(roomId);
         //broadcast an event saying there is a new room
         socket.broadcast.emit(RoomEvent.CREATED_ROOM, newRoom);
+        socket.emit(RoomEvent.CREATED_ROOM, newRoom);
     });
     /**Join room */
     socket.on(RoomEvent.JOIN_ROOM, function (_a) {
@@ -61,6 +62,7 @@ io.on(RoomEvent.connection, function (socket) {
         socket.join(res.roomId);
         // Broadcast when a user connects 
         socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
+        socket.emit(RoomEvent.JOINED_ROOM, res);
     });
     /**Leave room */
     socket.on(RoomEvent.LEAVE_ROOM, function (_a) {

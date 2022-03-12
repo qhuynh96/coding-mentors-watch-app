@@ -10,8 +10,8 @@ export interface RoomProps {
 
 interface RoomsContext {
     rooms: RoomProps[] 
-    getRooms?: (rooms: RoomProps[]) => void
-    addNewRoom?: (room: RoomProps) => void
+    getRooms: (rooms: RoomProps[]) => void
+    addNewRoom: (room: RoomProps) => void
 }
 
 export const RoomsContext = createContext({} as RoomsContext)

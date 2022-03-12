@@ -56,6 +56,7 @@ export enum RoomEvent  {
     socket.join(roomId)  
     //broadcast an event saying there is a new room
     socket.broadcast.emit(RoomEvent.CREATED_ROOM,newRoom)
+    socket.emit(RoomEvent.CREATED_ROOM,newRoom)
     })    
 
   /**Join room */
@@ -64,6 +65,7 @@ export enum RoomEvent  {
     socket.join(res.roomId)
     // Broadcast when a user connects 
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, res)
+    socket.emit(RoomEvent.JOINED_ROOM, res);
   })
 
   /**Leave room */

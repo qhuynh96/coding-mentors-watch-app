@@ -12,7 +12,7 @@ var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
 var http_1 = require("http");
-var rooms_1 = require("./utils/rooms");
+var rooms_1 = require("./rooms/rooms");
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: "*",
@@ -39,9 +39,7 @@ var RoomEvent;
 })(RoomEvent = exports.RoomEvent || (exports.RoomEvent = {}));
 /**Run when client connect */
 io.on(RoomEvent.connection, function (socket) {
-    console.log("user connected ".concat(socket.id));
     var rooms = (0, rooms_1.getRooms)();
-    console.log(rooms);
     socket.emit(RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
     /**Create New Room */
     socket.on(RoomEvent.CREATE_ROOM, function (_a) {

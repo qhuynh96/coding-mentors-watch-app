@@ -21,14 +21,17 @@ function App({ socket }: SocketProps) {
   })
   //create rooms
   const createRoom = ():void =>{
-    const roomId = v4()
-    socket.emit(RoomEvent.CREATE_ROOM,{roomId})    
+    socket.emit(RoomEvent.CREATE_ROOM,{roomId:generateRoomId()})    
   }
   //join room
-  const joinRoom = (roomId: string) =>{
+  const joinRoom = (roomId: string): void =>{
     socket.emit(RoomEvent.JOIN_ROOM,{roomId})
   }
-  
+  //Generate RoomId
+  const generateRoomId = () =>{
+    const roomId = v4()
+    return roomId
+  }
   const [serverStatus, setServerStatus] = useState("connecting to server...");
 
   useEffect(() => {

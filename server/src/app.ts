@@ -8,7 +8,7 @@ import logger from "morgan";
 
 
 import { createServer } from "http";
-import { createRoom, getRooms, joinRoom, RoomActs, Room, leaveRoom } from "./utils/rooms";
+import { createRoom, getRooms, joinRoom, RoomActs, Room, leaveRoom } from "./rooms/rooms";
 
 const app = express();
 
@@ -43,9 +43,7 @@ export enum RoomEvent  {
 
 /**Run when client connect */
   io.on(RoomEvent.connection,(socket: Socket)=>{
-  console.log(`user connected ${socket.id}`)
   const rooms = getRooms()
-  console.log(rooms)
   socket.emit(RoomEvent.SERVER_ROOMS,{rooms,userId:socket.id})
   /**Create New Room */
     socket.on(RoomEvent.CREATE_ROOM, ({roomId})=>{

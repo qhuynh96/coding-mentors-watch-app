@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = void 0;
-var rooms = [{ admin: 'assd', roomId: 'asddsa', members: ['1'] }];
+var rooms = [];
 //Get rooms
 var getRooms = function () {
     return rooms;

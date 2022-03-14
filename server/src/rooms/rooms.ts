@@ -10,7 +10,7 @@ export interface RoomActs {
 }
 
 
-const rooms: Array<Room> = [{admin: 'assd',roomId:'asddsa',members:['1']}]
+const rooms: Array<Room> = []
 //Get rooms
 export const getRooms = () =>{
     return rooms

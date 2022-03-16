@@ -16,6 +16,7 @@
     "react-scripts": "5.0.0",
     "socket.io-client": "^4.4.1",
     "typescript": "^4.5.5",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -41,5 +42,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.4"
   }
 }

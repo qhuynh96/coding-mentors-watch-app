@@ -25,7 +25,6 @@ var io = new socket_io_1.Server(server, {
         origin: "*",
     },
 });
-var rooms = {};
 //Socket Events
 var RoomEvent;
 (function (RoomEvent) {

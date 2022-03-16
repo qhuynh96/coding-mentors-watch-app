@@ -28,7 +28,6 @@ const io = new Server(server, {
   },
 });
 
-const rooms: Record<string, {admin: string,members: string[],roomId: string}> = {}
 
 //Socket Events
 export enum RoomEvent  {

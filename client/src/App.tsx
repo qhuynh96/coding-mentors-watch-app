@@ -3,8 +3,13 @@ import { useState, useEffect } from "react";
 import {v4} from 'uuid'
 import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
 import { RoomEvent, SocketProps } from "./interface";
+import { Socket } from "socket.io-client";
 
-function App({ socket }: SocketProps) {
+type Props = {
+  socket: Socket;
+};
+
+function App({ socket }: Props) {
   const [userId,setUserId]= useState<string | null>(null)
   //Context
   const {rooms,getRooms,addNewRoom} = useContext(RoomsContext)
@@ -32,6 +37,7 @@ function App({ socket }: SocketProps) {
     const roomId = v4()
     return roomId
   }
+
   const [serverStatus, setServerStatus] = useState("connecting to server...");
 
   useEffect(() => {

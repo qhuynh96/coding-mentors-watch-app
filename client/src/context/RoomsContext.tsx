@@ -38,6 +38,7 @@ export const RoomsContextProvider: FC<ReactNode> = ({
   };
     const playVideo = (videoOnPlay: VideoProps,roomId: string):void =>{
     setRooms(rooms.map((r: RoomProps)=>r.roomId === roomId ? {...r, onPlay: videoOnPlay }: r))
+
 }
   return (
     <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom,playVideo }}>

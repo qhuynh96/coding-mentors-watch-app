@@ -62,13 +62,20 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     
     // broadcast when a user connects
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
+
     socket.emit(RoomEvent.JOINED_ROOM, res);
   });
 
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: RoomActs) => {
     leaveRoom({ userId, roomId });
   });
+   /**Video on play */
+   socket.on(RoomEvent.PLAY_VIDEO,({videoOnplay, roomId})=>{
+    //broadcast to room except admin
+    socket.broadcast.to(roomId).emit(RoomEvent.PLAY_VIDEO,videoOnplay)
+  })
 });
+
 
 app.use(logger("dev"));
 app.use(express.json());

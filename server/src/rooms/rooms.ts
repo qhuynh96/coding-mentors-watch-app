@@ -1,8 +1,18 @@
-export interface Room {
-  admin: string;
-  roomId: string;
-  members: string[];
+type Video ={
+    src: string //https
+    playing: Boolean // true ? play : pause
+    start: string // ISOString
+    pause: number // milisecond
 }
+
+export interface Room {
+    admin: string
+    roomId: string
+    members: string[]
+    onPlay?: Video
+    videos?: Video['src'][]
+}
+
 
 export interface RoomActs {
   userId: string;

@@ -55,6 +55,12 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         var roomId = _a.roomId, userId = _a.userId;
         (0, rooms_1.leaveRoom)({ userId: userId, roomId: roomId });
     });
+    /**Video on play */
+    socket.on(RoomEvent_1.RoomEvent.PLAY_VIDEO, function (_a) {
+        var videoOnplay = _a.videoOnplay, roomId = _a.roomId;
+        //broadcast to room except admin
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.PLAY_VIDEO, videoOnplay);
+    });
 });
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.json());

@@ -1,8 +1,7 @@
-import { useContext } from "react";
-import { useState, useEffect } from "react";
-import { v4 } from "uuid";
+import { useState, useEffect, useContext } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
-import { RoomEvent, SocketProps } from "./interface";
+import { RoomEvent } from "./RoomEvent"
 import { Socket } from "socket.io-client";
 
 type Props = {
@@ -11,9 +10,9 @@ type Props = {
 
 function App({ socket }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
-  //Context
+
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
-  //socket on
+
   socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
     setUserId(userId);
     getRooms && getRooms(rooms);
@@ -22,19 +21,19 @@ function App({ socket }: Props) {
   socket.on(RoomEvent.CREATED_ROOM, (newRoom) => {
     addNewRoom && addNewRoom(newRoom);
   });
+
   socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomId }) => {});
-  //create rooms
+
   const createRoom = (): void => {
     socket.emit(RoomEvent.CREATE_ROOM, { roomId: generateRoomId() });
   };
-  //join room
+
   const joinRoom = (roomId: string): void => {
     socket.emit(RoomEvent.JOIN_ROOM, { roomId });
   };
-  //Generate RoomId
-  const generateRoomId = () => {
-    const roomId = v4();
-    return roomId;
+
+  const generateRoomId = (): string => {
+    return uuidv4();
   };
 
   const [serverStatus, setServerStatus] = useState("connecting to server...");
@@ -48,7 +47,7 @@ function App({ socket }: Props) {
 
   return (
     <>
-      <button onClick={createRoom}>create Room</button>
+      <button onClick={createRoom}>Create Room</button>
       <p>Server status: {serverStatus}</p>
     </>
   );

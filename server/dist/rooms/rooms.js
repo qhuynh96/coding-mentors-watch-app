@@ -9,7 +9,7 @@ var getRooms = function () {
 exports.getRooms = getRooms;
 //Create room
 var createRoom = function (room) {
-    if (!rooms.some(function (r) { return (r.roomId === room.roomId); })) {
+    if (!rooms.some(function (r) { return r.roomId === room.roomId; })) {
         rooms.push(room);
     }
     return room;
@@ -18,7 +18,9 @@ exports.createRoom = createRoom;
 //Join room
 var joinRoom = function (_a) {
     var userId = _a.userId, roomId = _a.roomId;
-    rooms.map(function (room) { return room.roomId === roomId ? room.members.push(userId) : null; });
+    rooms.map(function (room) {
+        return room.roomId === roomId ? room.members.push(userId) : null;
+    });
     var res = { userId: userId, roomId: roomId };
     return res;
 };

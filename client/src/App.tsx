@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { useState, useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
 import { RoomEvent } from "./RoomEvent";
+=======
+import { useState, useEffect, useContext } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
+import { RoomEvent } from "./RoomEvent"
+>>>>>>> 4fe695b (refactor & add documentation (#10))
 import { Socket } from "socket.io-client";
 import HomePage from "./pages/HomePage";
 import WatchTogether from "./pages/WatchTogether";
@@ -52,6 +59,7 @@ function App({ socket }: Props) {
 =======
 >>>>>>> c63bb8a (khoi: wire up create & join button in HomePage)
   return (
+<<<<<<< HEAD
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage socket={socket} />} />
@@ -62,6 +70,12 @@ function App({ socket }: Props) {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+=======
+    <>
+      <button onClick={createRoom}>Create Room</button>
+      <p>Server status: {serverStatus}</p>
+    </>
+>>>>>>> 4fe695b (refactor & add documentation (#10))
   );
 }
 

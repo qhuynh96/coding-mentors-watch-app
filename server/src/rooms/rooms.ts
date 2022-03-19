@@ -10,27 +10,37 @@ export interface RoomActs {
 }
 
 const rooms: Array<Room> = [];
-//Get rooms
+
 export const getRooms = () => {
   return rooms;
 };
-//Create room
-export const createRoom = (room: Room) => {
-  if (!rooms.some((r) => r.roomId === room.roomId)) {
-    rooms.push(room);
+
+export const createRoom = (newRoom: Room) => {
+  // check if the new room's ID does not already exist
+  if (!rooms.some((r) => r.roomId === newRoom.roomId)) {
+    rooms.push(newRoom);
   }
-  return room;
+  /**
+   * TODO: add error handling (case: the ID already exists)
+   * this task is not important in the near future
+   * given how unlikely it is to have duplicate room IDs
+   */
+  return newRoom;
 };
 
-//Join room
 export const joinRoom = ({ userId, roomId }: RoomActs) => {
-  rooms.map((room) =>
-    room.roomId === roomId ? room.members.push(userId) : null
-  );
-  const res = { userId, roomId };
-  return res;
+  /**
+   * roomId: ID of the room the user wish to join
+   * below, we check if a room with that ID exists
+   * if yes, add the userId to the room's list of members (ie. the user joins the room)
+   */
+  rooms.forEach((room) => {
+    if (room.roomId === roomId) {
+      room.members.push(userId);
+    }
+    // TODO: add error handling (case: roomId doesn't exist)
+  });
+  return { userId, roomId };
 };
-
-//Leave room
 
 export const leaveRoom = ({ userId, roomId }: RoomActs) => {};

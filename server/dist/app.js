@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RoomEvent = void 0;
 var http_errors_1 = __importDefault(require("http-errors"));
 var express_1 = __importDefault(require("express"));
 var socket_io_1 = require("socket.io");
@@ -11,6 +10,7 @@ var path_1 = __importDefault(require("path"));
 var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
+var RoomEvent_1 = require("./RoomEvent");
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
 var app = express_1.default();
@@ -25,44 +25,33 @@ var io = new socket_io_1.Server(server, {
         origin: "*",
     },
 });
-//Socket Events
-var RoomEvent;
-(function (RoomEvent) {
-    RoomEvent["connection"] = "connection";
-    RoomEvent["CREATE_ROOM"] = "CREATE_ROOM";
-    RoomEvent["JOIN_ROOM"] = "JOIN_ROOM";
-    RoomEvent["LEAVE_ROOM"] = "LEAVE_ROOM";
-    RoomEvent["SERVER_ROOMS"] = "SERVER_ROOMS";
-    RoomEvent["JOINED_ROOM"] = "JOINED_ROOM";
-    RoomEvent["CREATED_ROOM"] = "CREATED_ROOM";
-})(RoomEvent = exports.RoomEvent || (exports.RoomEvent = {}));
-/**Run when client connect */
-io.on(RoomEvent.connection, function (socket) {
+// run once the client connects
+io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     var rooms = rooms_1.getRooms();
-    socket.emit(RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
-    /**Create New Room */
-    socket.on(RoomEvent.CREATE_ROOM, function (_a) {
+    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
+    socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
         var roomId = _a.roomId;
-        //add a new room to the room list
-        var room = { admin: socket.id, members: [socket.id], roomId: roomId };
-        var newRoom = rooms_1.createRoom(room);
-        //join Room
+        // create a new room & append it to the current room array
+        var newRoom = rooms_1.createRoom({
+            admin: socket.id,
+            members: [socket.id],
+            roomId: roomId,
+        });
+        // join the new room
         socket.join(roomId);
-        //broadcast an event saying there is a new room
-        socket.broadcast.emit(RoomEvent.CREATED_ROOM, newRoom);
-        socket.emit(RoomEvent.CREATED_ROOM, newRoom);
+        // broadcast an event saying there is a new room
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
+        socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
     });
-    /**Join room */
-    socket.on(RoomEvent.JOIN_ROOM, function (_a) {
+    socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId;
         var res = rooms_1.joinRoom({ roomId: roomId, userId: socket.id });
         socket.join(res.roomId);
-        // Broadcast when a user connects
-        socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
-        socket.emit(RoomEvent.JOINED_ROOM, res);
+        // broadcast when a user connects
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
+        socket.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
     });
-    /**Leave room */
-    socket.on(RoomEvent.LEAVE_ROOM, function (_a) {
+    socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         rooms_1.leaveRoom({ userId: userId, roomId: roomId });
     });

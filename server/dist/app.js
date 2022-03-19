@@ -13,12 +13,12 @@ var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
-var app = (0, express_1.default)();
-app.use((0, cors_1.default)({
+var app = express_1.default();
+app.use(cors_1.default({
     origin: "*",
 }));
 // create http server
-var server = (0, http_1.createServer)(app);
+var server = http_1.createServer(app);
 // create the socket io server on top of the http server
 var io = new socket_io_1.Server(server, {
     cors: {
@@ -38,15 +38,15 @@ var RoomEvent;
 })(RoomEvent = exports.RoomEvent || (exports.RoomEvent = {}));
 /**Run when client connect */
 io.on(RoomEvent.connection, function (socket) {
-    var rooms = (0, rooms_1.getRooms)();
+    var rooms = rooms_1.getRooms();
     socket.emit(RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
     /**Create New Room */
     socket.on(RoomEvent.CREATE_ROOM, function (_a) {
         var roomId = _a.roomId;
-        //add a new room to the room list 
+        //add a new room to the room list
         var room = { admin: socket.id, members: [socket.id], roomId: roomId };
-        var newRoom = (0, rooms_1.createRoom)(room);
-        //join Room 
+        var newRoom = rooms_1.createRoom(room);
+        //join Room
         socket.join(roomId);
         //broadcast an event saying there is a new room
         socket.broadcast.emit(RoomEvent.CREATED_ROOM, newRoom);
@@ -55,22 +55,22 @@ io.on(RoomEvent.connection, function (socket) {
     /**Join room */
     socket.on(RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId;
-        var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: socket.id });
+        var res = rooms_1.joinRoom({ roomId: roomId, userId: socket.id });
         socket.join(res.roomId);
-        // Broadcast when a user connects 
+        // Broadcast when a user connects
         socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
         socket.emit(RoomEvent.JOINED_ROOM, res);
     });
     /**Leave room */
     socket.on(RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
-        (0, rooms_1.leaveRoom)({ userId: userId, roomId: roomId });
+        rooms_1.leaveRoom({ userId: userId, roomId: roomId });
     });
 });
-app.use((0, morgan_1.default)("dev"));
+app.use(morgan_1.default("dev"));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
-app.use((0, cookie_parser_1.default)());
+app.use(cookie_parser_1.default());
 app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
 app.get("/watch-app", (function (req, res) {
     res.status(200).json({
@@ -79,7 +79,7 @@ app.get("/watch-app", (function (req, res) {
 }));
 // catch 404 and forward to error handler
 app.use((function (req, res, next) {
-    next((0, http_errors_1.default)(404));
+    next(http_errors_1.default(404));
 }));
 // error handler
 app.use((function (err, req, res, next) {

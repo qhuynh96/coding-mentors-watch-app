@@ -31,6 +31,7 @@ function App({ socket }: Props) {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 

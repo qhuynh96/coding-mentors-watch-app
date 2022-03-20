@@ -5,6 +5,7 @@ import { RoomEvent } from "./RoomEvent";
 import { Socket } from "socket.io-client";
 import HomePage from "./pages/HomePage";
 import NewRoom from "./pages/NewRoom";
+
 import NotFound from "./pages/NotFound";
 
 type Props = {
@@ -23,6 +24,7 @@ function App({ socket }: Props) {
     });
   }, [getRooms, socket]);
 
+
   return (
     <BrowserRouter>
       <Routes>
@@ -31,6 +33,7 @@ function App({ socket }: Props) {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+
 
   );
 }

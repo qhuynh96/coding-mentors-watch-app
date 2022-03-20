@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useCallback } from "react";
+
 import { v4 as uuidv4 } from "uuid";
 import { Socket } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ function HomePage({ socket }: Props) {
   const navigate = useNavigate();
 
   const [userId, setUserId] = useState<string | null>(null);
+
   const [inputRoomID, setInputRoomID] = useState<string>("");
 
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
@@ -41,6 +43,7 @@ function HomePage({ socket }: Props) {
       navigate(`/room/${roomId}`);
     });
   }, [addNewRoom, getRooms, navigate, socket]);
+
 
   return (
     <div

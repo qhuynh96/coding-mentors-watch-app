@@ -1,11 +1,20 @@
-import React, { useEffect, useState } from "react";
-import SearchBar from "./SearchBar";
-import VideoDetail from "./VideoDetail";
-import VideoList from "./VideoList";
+import { FC, FormEvent, useState } from "react";
+import { Socket } from "socket.io-client";
+import { useParams } from "react-router-dom";
+import SearchBar from "../components/SearchBar";
+import VideoDetail from "../components/VideoDetail";
+import VideoList from "../components/VideoList";
+
+type Props = {
+  socket: Socket;
+};
 
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
 
-const NewRoom = () => {
+const NewRoom: FC<Props> = ({ socket }) => {
+  // TODO: define other socket events (for watching Youtube together/chatting)
+
+  const { roomID } = useParams();
   const [search, setSearch] = useState<string>("");
   const [video, setVideo] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -14,7 +23,7 @@ const NewRoom = () => {
 
   let searchId: string;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     searchId = search.includes("&")
       ? search.split("=")[1].split("&")[0]
@@ -70,7 +79,7 @@ const NewRoom = () => {
             className="four wide column"
             style={{ border: "1px solid black" }}
           >
-            <h3>Chat box</h3>
+            <h3>Chat box (room {roomID})</h3>
           </div>
         </div>
       </div>

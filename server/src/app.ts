@@ -1,12 +1,21 @@
 import createError from "http-errors";
 import express, { RequestHandler, ErrorRequestHandler } from "express";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import { RoomEvent } from "./RoomEvent";
 
 import { createServer } from "http";
+import {
+  createRoom,
+  getRooms,
+  joinRoom,
+  RoomActs,
+  Room,
+  leaveRoom,
+} from "./rooms/rooms";
 
 const app = express();
 
@@ -26,8 +35,39 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", () => {
-  console.log("a connection established");
+// run once the client connects
+io.on(RoomEvent.connection, (socket: Socket) => {
+  const rooms = getRooms();
+  socket.emit(RoomEvent.SERVER_ROOMS, { rooms, userId: socket.id });
+
+  socket.on(RoomEvent.CREATE_ROOM, ({ roomId }) => {
+    // create a new room & append it to the current room array
+    const newRoom = createRoom({
+      admin: socket.id,
+      members: [socket.id],
+      roomId,
+    });
+
+    // join the new room
+    socket.join(roomId);
+
+    // broadcast an event saying there is a new room
+    socket.broadcast.emit(RoomEvent.CREATED_ROOM, newRoom);
+    socket.emit(RoomEvent.CREATED_ROOM, newRoom);
+  });
+
+  socket.on(RoomEvent.JOIN_ROOM, ({ roomId }: RoomActs) => {
+    const res = joinRoom({ roomId, userId: socket.id });
+    socket.join(res.roomId);
+    
+    // broadcast when a user connects
+    socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
+    socket.emit(RoomEvent.JOINED_ROOM, res);
+  });
+
+  socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: RoomActs) => {
+    leaveRoom({ userId, roomId });
+  });
 });
 
 app.use(logger("dev"));

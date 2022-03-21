@@ -10,7 +10,9 @@ var path_1 = __importDefault(require("path"));
 var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
+var RoomEvent_1 = require("./RoomEvent");
 var http_1 = require("http");
+var rooms_1 = require("./rooms/rooms");
 var app = express_1.default();
 app.use(cors_1.default({
     origin: "*",
@@ -23,8 +25,36 @@ var io = new socket_io_1.Server(server, {
         origin: "*",
     },
 });
-io.on("connection", function () {
-    console.log("a connection established");
+// run once the client connects
+io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
+    var rooms = rooms_1.getRooms();
+    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
+    socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
+        var roomId = _a.roomId;
+        // create a new room & append it to the current room array
+        var newRoom = rooms_1.createRoom({
+            admin: socket.id,
+            members: [socket.id],
+            roomId: roomId,
+        });
+        // join the new room
+        socket.join(roomId);
+        // broadcast an event saying there is a new room
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
+        socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
+    });
+    socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
+        var roomId = _a.roomId;
+        var res = rooms_1.joinRoom({ roomId: roomId, userId: socket.id });
+        socket.join(res.roomId);
+        // broadcast when a user connects
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
+        socket.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
+    });
+    socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
+        var roomId = _a.roomId, userId = _a.userId;
+        rooms_1.leaveRoom({ userId: userId, roomId: roomId });
+    });
 });
 app.use(morgan_1.default("dev"));
 app.use(express_1.default.json());

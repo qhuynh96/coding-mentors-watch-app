@@ -1,3 +1,5 @@
+import HomePage from "./components/HomePage";
+import NewRoom from "./components/NewRoom";
 import { useState, useEffect, useContext } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
@@ -43,10 +45,13 @@ function App({ socket }: Props) {
       .then((res) => res.json())
       .then((res) => setServerStatus(res.message))
       .catch((error) => setServerStatus(error.message));
-  }, []);
+  });
 
   return (
     <>
+      {/* <p>Server status: {serverStatus}</p> */}
+      {/* <HomePage /> */}
+      <NewRoom />
       <button onClick={createRoom}>Create Room</button>
       <p>Server status: {serverStatus}</p>
     </>

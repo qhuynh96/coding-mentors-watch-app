@@ -28,4 +28,4 @@ const SearchBar = ({ value, handleChange, handleSubmit, ...rest }: IProps) => {
   );
 };
 
-export default SearchBar;
+export default React.memo(SearchBar);

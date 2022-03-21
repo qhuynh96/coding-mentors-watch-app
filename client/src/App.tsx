@@ -20,8 +20,8 @@ function App({ socket }: Props) {
   return (
     <>
       {/* <p>Server status: {serverStatus}</p> */}
-      <HomePage />
-      {/* <NewRoom /> */}
+      {/* <HomePage /> */}
+      <NewRoom />
     </>
   );
 }

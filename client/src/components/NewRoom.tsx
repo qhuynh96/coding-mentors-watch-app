@@ -3,28 +3,26 @@ import SearchBar from "./SearchBar";
 import VideoDetail from "./VideoDetail";
 import VideoList from "./VideoList";
 
+const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
+
 const NewRoom = () => {
   const [search, setSearch] = useState<string>("");
   const [video, setVideo] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
-  let url = `https://www.youtube.com/embed/${selectedVideo}`;
+  const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
 
   let searchId: string;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    searchId = search.includes("&")
+      ? search.split("=")[1].split("&")[0]
+      : search.split("=")[1];
 
     if (!selectedVideo) {
-      searchId = search.includes("&")
-        ? search.split("=")[1].split("&")[0]
-        : search.split("=")[1];
-
       setSelectedVideo(searchId);
     } else {
-      searchId = search.includes("&")
-        ? search.split("=")[1].split("&")[0]
-        : search.split("=")[1];
       setVideo([...video, searchId]);
     }
     setSearch("");

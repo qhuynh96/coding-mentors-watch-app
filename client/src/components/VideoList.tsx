@@ -16,4 +16,4 @@ const VideoList = ({ video }: IProps) => {
   );
 };
 
-export default VideoList;
+export default React.memo(VideoList);

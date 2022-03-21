@@ -9,17 +9,15 @@ const VideoDetail = (props: IProps) => {
     return <div className="ui embed ">...loading</div>;
   }
   return (
-    <>
-      <div className="ui embed ">
-        <iframe
-          src={props.url}
-          title="YouTube video player"
-          frameBorder={"0"}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        ></iframe>
-      </div>
-    </>
+    <div className="ui embed ">
+      <iframe
+        src={props.url}
+        title="YouTube video player"
+        frameBorder={"0"}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      />
+    </div>
   );
 };
 
-export default VideoDetail;
+export default React.memo(VideoDetail);

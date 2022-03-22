@@ -24,6 +24,7 @@ function App({ socket }: Props) {
     });
   }, [getRooms, socket]);
 
+
   return (
     <BrowserRouter>
       <Routes>

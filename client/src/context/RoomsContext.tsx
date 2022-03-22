@@ -1,36 +1,37 @@
-import { useContext } from "react";
-import { useState } from "react";
-import { createContext } from "react";
+import { FC, ReactNode, useState, useContext, createContext } from "react";
 
 export interface RoomProps {
-    roomId:string,
-    admin: string,
-    members: string[]
+  roomId: string;
+  admin: string;
+  members: string[];
 }
 
-interface RoomsContext {
-    rooms?: RoomProps[] 
-    getRooms?: (rooms: RoomProps[]) => void
-    addNewRoom?: (room: RoomProps) => void
+interface RoomsContextInterface {
+  rooms?: RoomProps[];
+  getRooms?: (rooms: RoomProps[]) => void;
+  addNewRoom?: (room: RoomProps) => void;
 }
 
-export const RoomsContext = createContext<RoomsContext >({})
+export const RoomsContext = createContext<RoomsContextInterface>({});
 
-export const RoomsContextProvider: React.FC<React.ReactNode> = ({children}) =>{
-    const [rooms,setRooms] = useState<RoomProps[]>([])
-    //get rooms
-    const getRooms = (rooms: RoomProps[]):void =>{
-        setRooms(rooms)
-    }
-    //add new room
-    const addNewRoom = (room: RoomProps):void =>{
-        setRooms([...rooms,room])
-    }
-    return (
-        <RoomsContext.Provider value={{rooms,getRooms,addNewRoom}}>
-            {children}
-        </RoomsContext.Provider>
-    )
-}
+export const RoomsContextProvider: FC<ReactNode> = ({
+  children,
+}) => {
+  const [rooms, setRooms] = useState<RoomProps[]>([]);
 
-export const useRooms =() => useContext(RoomsContext)
+  const getRooms = (rooms: RoomProps[]): void => {
+    setRooms(rooms);
+  };
+
+  const addNewRoom = (room: RoomProps): void => {
+    setRooms([...rooms, room]);
+  };
+
+  return (
+    <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom }}>
+      {children}
+    </RoomsContext.Provider>
+  );
+};
+
+export const useRooms = () => useContext(RoomsContext);

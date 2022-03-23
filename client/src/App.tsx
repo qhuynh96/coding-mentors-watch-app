@@ -8,11 +8,8 @@ import NewRoom from "./pages/NewRoom";
 
 import NotFound from "./pages/NotFound";
 
-type Props = {
-  socket: Socket;
-};
 
-function App({ socket }: Props) {
+function App({socket}: {socket: Socket}) {
   const [userId, setUserId] = useState<string | null>(null);
 
   const { rooms, getRooms, addNewRoom,playVideo } = useContext(RoomsContext);

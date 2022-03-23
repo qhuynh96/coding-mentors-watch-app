@@ -1,9 +1,10 @@
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent, useState,useEffect } from "react";
 import { Socket } from "socket.io-client";
 import { useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import VideoDetail from "../components/VideoDetail";
 import VideoList from "../components/VideoList";
+import { RoomEvent } from "../RoomEvent"
 
 type Props = {
   socket: Socket;
@@ -15,6 +16,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
   // TODO: define other socket events (for watching Youtube together/chatting)
 
   const { roomID } = useParams();
+
   const [search, setSearch] = useState<string>("");
   const [video, setVideo] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -31,11 +33,17 @@ const NewRoom: FC<Props> = ({ socket }) => {
 
     if (!selectedVideo) {
       setSelectedVideo(searchId);
+
     } else {
       setVideo([...video, searchId]);
     }
     setSearch("");
   };
+
+  /**Send selectedVideo to socket */
+  useEffect(()=>{
+    !selectedVideo && socket.emit(RoomEvent.SELECT_VIDEO, {selectedVideo})
+  },[url])
 
   return (
     <div className="ui segment">
@@ -53,7 +61,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
         </div>
         <div className="ui row">
           <form className="ten wide column">
-            <VideoDetail playedVideo={selectedVideo} url={url} />
+            <VideoDetail selectedVideo={selectedVideo} url={url}  />
           </form>
           <div
             className="four wide column"

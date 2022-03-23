@@ -56,52 +56,12 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     socket.emit(RoomEvent.CREATED_ROOM, newRoom);
   });
 
-<<<<<<< HEAD
   socket.on(RoomEvent.JOIN_ROOM, ({ roomId }: RoomActs) => {
     const res = joinRoom({ roomId, userId: socket.id });
     socket.join(res.roomId);
     
     // broadcast when a user connects
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
-=======
-//Socket Events
-export enum RoomEvent  {
-  connection= 'connection',
-  CREATE_ROOM="CREATE_ROOM",
-  JOIN_ROOM="JOIN_ROOM",
-  LEAVE_ROOM="LEAVE_ROOM",
-  SERVER_ROOMS="SERVER_ROOMS",
-  JOINED_ROOM="JOINED_ROOM",
-  CREATED_ROOM="CREATED_ROOM",
-  PLAY_VIDEO = "PLAY_VIDEO"
-
-}
-
-/**Run when client connect */
-  io.on(RoomEvent.connection,(socket: Socket)=>{
-  const rooms = getRooms()
-  socket.emit(RoomEvent.SERVER_ROOMS,{rooms,userId:socket.id})
-  /**Create New Room */
-    socket.on(RoomEvent.CREATE_ROOM, ({roomId})=>{
-    //add a new room to the room list 
-    const room = {admin: socket.id, members:[socket.id], roomId}
-    const newRoom = createRoom(room)
-    //join Room 
-    socket.join(roomId)  
-    //broadcast an event saying there is a new room
-    socket.broadcast.emit(RoomEvent.CREATED_ROOM,newRoom)
-    socket.emit(RoomEvent.CREATED_ROOM,newRoom)
-    })    
-
-  /**Join room */
-    socket.on(RoomEvent.JOIN_ROOM,({roomId}: RoomActs)=>{
-    const res = joinRoom({roomId,userId: socket.id})
-    socket.join(res.roomId)
-    // Broadcast when a user connects 
-    socket.broadcast.emit(RoomEvent.JOINED_ROOM, res)
-    socket.emit(RoomEvent.JOINED_ROOM, res);
-  })
->>>>>>> 846da5f (play video and broadcast)
 
     socket.emit(RoomEvent.JOINED_ROOM, res);
   });
@@ -110,21 +70,12 @@ export enum RoomEvent  {
     leaveRoom({ userId, roomId });
   });
    /**Video on play */
-   socket.on(RoomEvent.PLAY_VIDEO,({videoOnplay, roomId})=>{
+   socket.on(RoomEvent.SELECT_VIDEO,({videoOnplay, roomId})=>{
     //broadcast to room except admin
-    socket.broadcast.to(roomId).emit(RoomEvent.PLAY_VIDEO,videoOnplay)
-  })
-<<<<<<< HEAD
-});
-
-=======
-  /**Video on play */
-  socket.on(RoomEvent.PLAY_VIDEO,({videoOnplay, roomId})=>{
-    //broadcast to room except admin
-    socket.broadcast.to(roomId).emit(RoomEvent.PLAY_VIDEO,videoOnplay)
+    socket.broadcast.to(roomId).emit(RoomEvent.SELECT_VIDEO,videoOnplay)
   })
 })
->>>>>>> 846da5f (play video and broadcast)
+
 
 app.use(logger("dev"));
 app.use(express.json());

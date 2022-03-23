@@ -1,9 +1,12 @@
-import React, { useRef,useLayoutEffect,useState,useEffect} from "react";
+import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import ReactPlayer from "react-player";
+import { Socket } from "socket.io-client";
+import { RoomEvent } from "../RoomEvent"
 
 interface IProps {
   selectedVideo: string | null;
   url: string;
+  socket: Socket
 }
 const initialvalue = {
   playing: false,
@@ -13,57 +16,63 @@ const initialvalue = {
 const VideoDetail = (props: IProps) => {
   const [videoOnPlay, setVideoOnplay] = useState<any>(initialvalue);
   const playerRef = useRef<any>();
-  const { url, selectedVideo } = props;
-  const admin = true
+  const { url, selectedVideo,socket } = props;
+  //Set admin to remove controls from clients so movie will play synchronously
+  //Will figure out a way for this
+  const admin = true;
   /**Handle Player */
   const handlePlay = () => {
-    setVideoOnplay((prev: any) => ({ ...prev,playing: true, playAt: prev.playAt === 0 ? new Date().getTime(): prev.playAt }));    
+    setVideoOnplay((prev: any) => ({
+      ...prev,
+      playing: true,
+      playAt: prev.playAt === 0 ? new Date().getTime() : prev.playAt,
+    }));
   };
   const handlePause = () => {
-    setVideoOnplay((prev: any) => ({ ...prev,playing: false }));    
+    setVideoOnplay((prev: any) => ({ ...prev, playing: false }));
   };
 
   /**Pause time calculation*/
-  useEffect(()=>{
-    if (videoOnPlay.playing ===  false) {
-      const Calc =()=>{
-        setVideoOnplay((prev:any)=>({...prev, pause: prev.playing === true ? complete(prev.pause): prev.pause + 0.5}))
-      }
-      let timer: any = setInterval(Calc,500)
+  //Use pause period and start time (in second) so we can calculate playing time of movie => solve delay at server
+  useEffect(() => {    
+    if (videoOnPlay.playing === false) {
+      const Calc = () => {
+        setVideoOnplay((prev: any) => ({
+          ...prev,
+          pause:
+            prev.playing === true ? complete(prev.pause) : prev.pause + 0.5,
+        }));
+      };
+      let timer: any = setInterval(Calc, 500);
 
-      const complete = (pause:any) =>{
+      const complete = (pause: any) => {
         clearInterval(timer);
         timer = null;
-        return pause
-      }
-    } 
-  },[videoOnPlay.playing])
-  
-  /**Set Time playing at */
+        return pause;
+      };
+    }
+  }, [videoOnPlay.playing]);
+
+  /**Youtube automatically plays at a memorised time so I set initial playling false and when we play video it will start at 0 */
+  /**If anyone have another idea, please share */
   useEffect(() => {
     if (playerRef.current) {
-      playerRef.current.seekTo(videoOnPlay.playAt === 0 ? 0 :(new Date().getTime()-videoOnPlay.playAt)/1000- videoOnPlay.pause);
+      playerRef.current.seekTo(
+        videoOnPlay.playAt === 0
+          ? 0
+          : (new Date().getTime() - videoOnPlay.playAt) / 1000 -
+              videoOnPlay.pause
+      );
       playerRef.current.player.isPlaying = true;
     }
   }, [videoOnPlay.playing]);
 
-  useEffect(()=>{
-    if (playerRef.current) {
-      playerRef.current.seekTo(videoOnPlay.playAt === 0 ? 0 :(new Date().getTime()-videoOnPlay.playAt)/1000- videoOnPlay.pause);
-    }
-    console.log('url')
-  },[url])
+  /**Send selectedVideo to socket */
+  useEffect(() => {
+    !selectedVideo && socket.emit(RoomEvent.SELECT_VIDEO, { selectedVideo });
+  }, [url]);
 
-    //  //Play video
-    //  const handlePlay = (src: string, room: RoomProps) =>{
-    //   if (!room.onPlay) {
-    //     const videoOnPlay = {src, playing: true, start: (new Date()).toISOString(), pause: 0}
-    //     playVideo && playVideo(videoOnPlay,room.roomId)
-    //   //Emit to server
-    //     
-    //   }     
-    //   //Send resquest for next movie 
-    // }
+  
   if (!selectedVideo) {
     return <div className="ui embed ">...loading</div>;
   }
@@ -72,12 +81,12 @@ const VideoDetail = (props: IProps) => {
       <ReactPlayer
         ref={playerRef}
         url={url}
-        controls = {true}
+        controls={true}
         playing={videoOnPlay.playing}
         onReady={() => console.log(url, selectedVideo)}
         onPlay={handlePlay}
         onPause={handlePause}
-        style={{ pointerEvents: `${!admin && 'none' || 'auto'}`}}
+        style={{ pointerEvents: `${(!admin && "none") || "auto"}` }}
       />
     </div>
   );

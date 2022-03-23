@@ -5,14 +5,12 @@ import { RoomEvent } from "./RoomEvent";
 import { Socket } from "socket.io-client";
 import HomePage from "./pages/HomePage";
 import NewRoom from "./pages/NewRoom";
-
 import NotFound from "./pages/NotFound";
-
 
 function App({socket}: {socket: Socket}) {
   const [userId, setUserId] = useState<string | null>(null);
 
-  const { rooms, getRooms, addNewRoom,playVideo } = useContext(RoomsContext);
+  const {rooms, getRooms} = useContext(RoomsContext);
 
   useEffect(() => {
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {

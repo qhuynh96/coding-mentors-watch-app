@@ -40,10 +40,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
     setSearch("");
   };
 
-  /**Send selectedVideo to socket */
-  useEffect(()=>{
-    !selectedVideo && socket.emit(RoomEvent.SELECT_VIDEO, {selectedVideo})
-  },[url])
+
 
   return (
     <div className="ui segment">
@@ -61,7 +58,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
         </div>
         <div className="ui row">
           <form className="ten wide column">
-            <VideoDetail selectedVideo={selectedVideo} url={url}  />
+            <VideoDetail socket={socket} selectedVideo={selectedVideo} url={url}  />
           </form>
           <div
             className="four wide column"

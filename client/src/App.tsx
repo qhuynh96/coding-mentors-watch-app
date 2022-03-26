@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RoomProps, RoomsContext, useRooms } from "./context/RoomsContext";
 import { RoomEvent } from "./RoomEvent";
@@ -16,19 +16,18 @@ function App({ socket }: Props) {
 
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
 
-  socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
-    setUserId(userId);
-    getRooms && getRooms(rooms);
-  });
+  useEffect(() => {
+    socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
+      setUserId(userId);
+      getRooms && getRooms(rooms);
+    });
+  }, [getRooms, socket]);
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage socket={socket} />} />
-        <Route
-          path="/room/:roomID"
-          element={<NewRoom socket={socket} />}
-        />
+        <Route path="/room/:roomID" element={<NewRoom socket={socket} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

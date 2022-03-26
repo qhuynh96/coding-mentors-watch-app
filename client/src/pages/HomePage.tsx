@@ -14,7 +14,6 @@ function HomePage({ socket }: Props) {
   const navigate = useNavigate();
 
   const [userId, setUserId] = useState<string | null>(null);
-  const [roomID, setRoomID] = useState<string | null>(null);
   const [inputRoomID, setInputRoomID] = useState<string>("");
 
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
@@ -23,12 +22,9 @@ function HomePage({ socket }: Props) {
     socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4() });
   }, [socket]);
 
-  const joinRoom = useCallback(
-    (roomId: string): void => {
-      socket.emit(RoomEvent.JOIN_ROOM, { roomId });
-    },
-    [socket]
-  );
+  const joinRoom = useCallback(() => {
+    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID });
+  }, [inputRoomID, socket]);
 
   useEffect(() => {
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
@@ -38,27 +34,13 @@ function HomePage({ socket }: Props) {
 
     socket.on(RoomEvent.CREATED_ROOM, (newRoom) => {
       addNewRoom && addNewRoom(newRoom);
-      setRoomID(newRoom.roomId);
+      navigate(`/room/${newRoom.roomId}`);
     });
 
     socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomId }) => {
-      setRoomID(roomId);
+      navigate(`/room/${roomId}`);
     });
-  }, [addNewRoom, getRooms, socket]);
-
-  useEffect(() => {
-    /**
-     * the if condition is used to prevent useEffect run on first render
-     * when roomID === null, and the client will be directed to /room/null
-     * TODO: there might be a better alternative
-     */
-    if (roomID !== null) {
-      navigate(`/room/${roomID}`);
-    }
-    return () => {
-      setRoomID(null);
-    };
-  }, [roomID, navigate]);
+  }, [addNewRoom, getRooms, navigate, socket]);
 
   return (
     <div
@@ -81,14 +63,7 @@ function HomePage({ socket }: Props) {
         )}
         placeholder="Enter room ID"
       />
-      <Button
-        onClick={useCallback(
-          () => joinRoom(inputRoomID),
-          [inputRoomID, joinRoom]
-        )}
-      >
-        Join
-      </Button>
+      <Button onClick={joinRoom}>Join</Button>
     </div>
   );
 }

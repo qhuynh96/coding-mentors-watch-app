@@ -5,7 +5,7 @@ export default function NotFound() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "90vh",
+        height: "100vh",
       }}
     >
       <h1>Page Not Found!</h1>

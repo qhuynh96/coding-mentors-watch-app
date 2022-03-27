@@ -17,4 +17,5 @@ var RoomEvent;
     RoomEvent["JOINED_ROOM"] = "JOINED_ROOM";
     RoomEvent["CREATED_ROOM"] = "CREATED_ROOM";
     RoomEvent["SELECT_VIDEO"] = "SELECT_VIDEO";
+    RoomEvent["VIDEO_ONPLAY"] = "VIDEO_ONPLAY";
 })(RoomEvent = exports.RoomEvent || (exports.RoomEvent = {}));

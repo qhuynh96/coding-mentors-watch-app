@@ -1,5 +1,5 @@
-type Video ={
-    src: string //https
+export type VideoProps ={
+    url: string //https
     playing: Boolean // true ? play : pause
     start: string // ISOString
     pause: number // milisecond
@@ -9,10 +9,9 @@ export interface Room {
     admin: string
     roomId: string
     members: string[]
-    onPlay?: Video
-    videos?: Video['src'][]
+    onPlay: VideoProps
+    videos: string[]
 }
-
 
 export interface RoomActs {
   userId: string;
@@ -20,6 +19,11 @@ export interface RoomActs {
 }
 
 const rooms: Array<Room> = [];
+
+export const setVideoOnPlay = (videoOnplay: VideoProps, roomId: string) =>{
+  rooms.forEach((room: Room)=>(room.roomId ===roomId) && (room.onPlay = videoOnplay) )
+  
+}
 
 export const getRooms = () => {
   return rooms;
@@ -38,19 +42,21 @@ export const createRoom = (newRoom: Room) => {
   return newRoom;
 };
 
-export const joinRoom = ({ userId, roomId }: RoomActs) => {
+export const joinRoom =({ userId, roomId }: RoomActs) => {
   /**
    * roomId: ID of the room the user wish to join
    * below, we check if a room with that ID exists
    * if yes, add the userId to the room's list of members (ie. the user joins the room)
    */
-  rooms.forEach((room) => {
+   rooms.forEach((room) => {    
     if (room.roomId === roomId) {
       room.members.push(userId);
     }
     // TODO: add error handling (case: roomId doesn't exist)
   });
-  return { userId, roomId };
+  const roomDetail = rooms.filter((room)=>room.roomId ===roomId)[0]
+
+  return { userId, roomDetail };
 };
 
 export const leaveRoom = ({ userId, roomId }: RoomActs) => {};

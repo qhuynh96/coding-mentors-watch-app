@@ -11,6 +11,7 @@ var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
 var RoomEvent_1 = require("./RoomEvent");
+var uuid_1 = require("uuid");
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
 var app = (0, express_1.default)();
@@ -28,28 +29,31 @@ var io = new socket_io_1.Server(server, {
 // run once the client connects
 io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     var rooms = (0, rooms_1.getRooms)();
-    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: socket.id });
+    //TODO Khang: change userId : uuid (install uuid)
+    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: (0, uuid_1.v4)() });
     socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
-        var roomId = _a.roomId;
+        var roomId = _a.roomId, userId = _a.userId;
         // create a new room & append it to the current room array
         var newRoom = (0, rooms_1.createRoom)({
-            admin: socket.id,
-            members: [socket.id],
+            admin: userId,
+            members: [userId],
             roomId: roomId,
+            onPlay: {},
+            videos: [],
         });
         // join the new room
         socket.join(roomId);
         // broadcast an event saying there is a new room
-        socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
-        socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, newRoom);
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
+        socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
     });
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId;
-        var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: socket.id });
-        socket.join(res.roomId);
+        var _b = (0, rooms_1.joinRoom)({ roomId: roomId, userId: socket.id }), userId = _b.userId, roomDetail = _b.roomDetail;
+        socket.join(roomDetail.roomId);
         // broadcast when a user connects
-        socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
-        socket.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, res);
+        socket.broadcast.to(roomDetail.roomId).emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomDetail: roomDetail });
+        io.to(roomDetail.roomId).emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomDetail: roomDetail });
     });
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
@@ -57,9 +61,11 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     });
     /**Video on play */
     socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
-        var videoOnplay = _a.videoOnplay, roomId = _a.roomId;
+        var videoOnPlay = _a.videoOnPlay, roomId = _a.roomId;
+        (0, rooms_1.setVideoOnPlay)(videoOnPlay, roomId);
+        console.log(videoOnPlay);
         //broadcast to room except admin
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.SELECT_VIDEO, videoOnplay);
+        io.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, videoOnPlay);
     });
 });
 app.use((0, morgan_1.default)("dev"));

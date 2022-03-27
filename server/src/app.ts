@@ -6,7 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import { RoomEvent } from "./RoomEvent";
-
+import { v4 as uuidv4 } from "uuid";
 import { createServer } from "http";
 import {
   createRoom,
@@ -15,6 +15,8 @@ import {
   RoomActs,
   Room,
   leaveRoom,
+  setVideoOnPlay,
+  VideoProps,
 } from "./rooms/rooms";
 
 const app = express();
@@ -38,41 +40,45 @@ const io = new Server(server, {
 // run once the client connects
 io.on(RoomEvent.connection, (socket: Socket) => {
   const rooms = getRooms();
-  socket.emit(RoomEvent.SERVER_ROOMS, { rooms, userId: socket.id });
+  //TODO Khang: change userId : uuid (install uuid)
+  socket.emit(RoomEvent.SERVER_ROOMS, { rooms, userId: uuidv4() });
 
-  socket.on(RoomEvent.CREATE_ROOM, ({ roomId }) => {
+  socket.on(RoomEvent.CREATE_ROOM, ({ roomId,userId}) => {
     // create a new room & append it to the current room array
     const newRoom = createRoom({
-      admin: socket.id,
-      members: [socket.id],
+      admin: userId,
+      members: [userId],
       roomId,
+      onPlay: {} as VideoProps,
+      videos: [] as string[],
     });
 
     // join the new room
     socket.join(roomId);
 
     // broadcast an event saying there is a new room
-    socket.broadcast.emit(RoomEvent.CREATED_ROOM, newRoom);
-    socket.emit(RoomEvent.CREATED_ROOM, newRoom);
+    socket.broadcast.emit(RoomEvent.CREATED_ROOM, {newRoom,userId});
+    socket.emit(RoomEvent.CREATED_ROOM, {newRoom,userId});
   });
 
   socket.on(RoomEvent.JOIN_ROOM, ({ roomId }: RoomActs) => {
-    const res = joinRoom({ roomId, userId: socket.id });
-    socket.join(res.roomId);
+    const {userId,roomDetail} = joinRoom({ roomId, userId: socket.id });
     
+    socket.join(roomDetail.roomId);
     // broadcast when a user connects
-    socket.broadcast.emit(RoomEvent.JOINED_ROOM, res);
-
-    socket.emit(RoomEvent.JOINED_ROOM, res);
+    socket.broadcast.to(roomDetail.roomId).emit(RoomEvent.JOINED_ROOM, {userId,roomDetail});
+    io.to(roomDetail.roomId).emit(RoomEvent.JOINED_ROOM, {userId,roomDetail});
   });
 
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: RoomActs) => {
     leaveRoom({ userId, roomId });
   });
    /**Video on play */
-   socket.on(RoomEvent.SELECT_VIDEO,({videoOnplay, roomId})=>{
+   socket.on(RoomEvent.SELECT_VIDEO,({videoOnPlay, roomId})=>{
+     setVideoOnPlay(videoOnPlay,roomId,)
+     console.log(videoOnPlay)
     //broadcast to room except admin
-    socket.broadcast.to(roomId).emit(RoomEvent.SELECT_VIDEO,videoOnplay)
+    io.to(roomId).emit(RoomEvent.VIDEO_ONPLAY,videoOnPlay)
   })
 })
 

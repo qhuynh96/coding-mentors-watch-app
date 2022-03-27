@@ -1,24 +1,25 @@
+import { useCallback } from "react";
 import { FC, ReactNode, useState, useContext, createContext } from "react";
 
-type VideoProps ={
-    src: string //https
-    playing: Boolean // true ? play : pause
-    start: string // ISOString
-    pause: number // milisecond
+export interface IVideo {
+  url: string;
+  playing: boolean;
+  playAt: number;
+  pause: number;
 }
 export interface RoomProps {
   roomId: string;
   admin: string;
   members: string[];  
-  onPlay?: VideoProps
-  videos?: VideoProps['src'][]
+  onPlay: IVideo 
+  videos: string[]
 }
 
 interface RoomsContextInterface {
   rooms?: RoomProps[];
   getRooms?: (rooms: RoomProps[]) => void;
   addNewRoom?: (room: RoomProps) => void;
-  playVideo?: (onPlay: VideoProps,roomId: string) => void
+  playVideo?: (onPlay: IVideo,roomId: string) => void
 
 }
 
@@ -29,17 +30,16 @@ export const RoomsContextProvider: FC<ReactNode> = ({
 }) => {
   const [rooms, setRooms] = useState<RoomProps[]>([]);
 
-  const getRooms = (rooms: RoomProps[]): void => {
+  const getRooms = useCallback((rooms: RoomProps[]): void => {
     setRooms(rooms);
-  };
+  },[]);
 
-  const addNewRoom = (room: RoomProps): void => {
+  const addNewRoom = useCallback((room: RoomProps): void => {
     setRooms([...rooms, room]);
-  };
-    const playVideo = (videoOnPlay: VideoProps,roomId: string):void =>{
+  },[]);
+    const playVideo = useCallback((videoOnPlay: IVideo,roomId: string):void =>{
     setRooms(rooms.map((r: RoomProps)=>r.roomId === roomId ? {...r, onPlay: videoOnPlay }: r))
-
-}
+},[])
   return (
     <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom,playVideo }}>
       {children}

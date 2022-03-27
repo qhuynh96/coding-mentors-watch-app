@@ -5,46 +5,45 @@ import { Socket } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
 import { RoomEvent } from "../RoomEvent";
-import { RoomsContext } from "../context/RoomsContext";
-
+import { RoomProps, RoomsContext } from "../context/RoomsContext";
 type Props = {
   socket: Socket;
 };
 
+
 function HomePage({ socket }: Props) {
   const navigate = useNavigate();
-
   const [userId, setUserId] = useState<string | null>(null);
-
   const [inputRoomID, setInputRoomID] = useState<string>("");
 
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
-
-  const createRoom = useCallback((): void => {
-    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4() });
-  }, [socket]);
+  
+  const createRoom = useCallback(() => {
+    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId });    
+  }, [userId,socket]);
 
   const joinRoom = useCallback(() => {
     socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID });
-  }, [inputRoomID, socket]);
-
-  useEffect(() => {
+    navigate(`/room/${inputRoomID}`,{state: {userId}});
+  }, [inputRoomID, socket,userId]);
+  
+  useEffect(()=>{
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
       setUserId(userId);
       getRooms && getRooms(rooms);
     });
+  },[socket])
 
-    socket.on(RoomEvent.CREATED_ROOM, (newRoom) => {
+  useEffect(() => {    
+    socket.on(RoomEvent.CREATED_ROOM, ({newRoom}) => {
       addNewRoom && addNewRoom(newRoom);
-      navigate(`/room/${newRoom.roomId}`);
+      //To prevent navigating all clients to new room, we put a condition
+      userId === newRoom.admin && navigate(`/room/${newRoom.roomId}`,{state: {userId}});  
     });
+    
+  }, [userId]);
 
-    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomId }) => {
-      navigate(`/room/${roomId}`);
-    });
-  }, [addNewRoom, getRooms, navigate, socket]);
-
-
+  
   return (
     <div
       style={{

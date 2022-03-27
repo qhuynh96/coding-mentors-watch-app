@@ -1,7 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = void 0;
+exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = exports.setVideoOnPlay = void 0;
 var rooms = [];
+var setVideoOnPlay = function (videoOnplay, roomId) {
+    rooms.forEach(function (room) { return (room.roomId === roomId) && (room.onPlay = videoOnplay); });
+};
+exports.setVideoOnPlay = setVideoOnPlay;
 var getRooms = function () {
     return rooms;
 };
@@ -32,7 +36,8 @@ var joinRoom = function (_a) {
         }
         // TODO: add error handling (case: roomId doesn't exist)
     });
-    return { userId: userId, roomId: roomId };
+    var roomDetail = rooms.filter(function (room) { return room.roomId === roomId; })[0];
+    return { userId: userId, roomDetail: roomDetail };
 };
 exports.joinRoom = joinRoom;
 var leaveRoom = function (_a) {

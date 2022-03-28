@@ -43,17 +43,24 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         });
         // join the new room
         socket.join(roomId);
-        // broadcast an event saying there is a new room
+        // broadcast an new Room except 
         socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
+        // send back to room creator
         socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
+        // Navigate to new room
+        socket.emit(RoomEvent_1.RoomEvent.NAVIGATE, { userId: userId, roomInfo: newRoom });
     });
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
-        var roomId = _a.roomId;
-        var _b = (0, rooms_1.joinRoom)({ roomId: roomId, userId: socket.id }), userId = _b.userId, roomDetail = _b.roomDetail;
-        socket.join(roomDetail.roomId);
+        var roomId = _a.roomId, userId = _a.userId;
+        var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: userId });
+        var roomInfo = res.roomInfo;
+        socket.join(res.roomInfo.roomId);
         // broadcast when a user connects
-        socket.broadcast.to(roomDetail.roomId).emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomDetail: roomDetail });
-        io.to(roomDetail.roomId).emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomDetail: roomDetail });
+        socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
+        // send back to participant
+        socket.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
+        // Navigate to the room
+        socket.emit(RoomEvent_1.RoomEvent.NAVIGATE, { userId: userId, roomInfo: roomInfo });
     });
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
@@ -62,10 +69,10 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     /**Video on play */
     socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
         var videoOnPlay = _a.videoOnPlay, roomId = _a.roomId;
-        (0, rooms_1.setVideoOnPlay)(videoOnPlay, roomId);
+        var res = (0, rooms_1.setVideoOnPlay)(videoOnPlay, roomId);
         console.log(videoOnPlay);
         //broadcast to room except admin
-        io.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, videoOnPlay);
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, res.videoOnPlay);
     });
 });
 app.use((0, morgan_1.default)("dev"));

@@ -56,18 +56,24 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     // join the new room
     socket.join(roomId);
 
-    // broadcast an event saying there is a new room
+    // broadcast an new Room except 
     socket.broadcast.emit(RoomEvent.CREATED_ROOM, {newRoom,userId});
+    // send back to room creator
     socket.emit(RoomEvent.CREATED_ROOM, {newRoom,userId});
+    // Navigate to new room
+    socket.emit(RoomEvent.NAVIGATE,{userId,roomInfo : newRoom})
   });
 
-  socket.on(RoomEvent.JOIN_ROOM, ({ roomId }: RoomActs) => {
-    const {userId,roomDetail} = joinRoom({ roomId, userId: socket.id });
-    
-    socket.join(roomDetail.roomId);
+  socket.on(RoomEvent.JOIN_ROOM, ({ roomId,userId }: RoomActs) => {
+    const res = joinRoom({ roomId, userId });
+    const {roomInfo} = res
+    socket.join(res.roomInfo.roomId);
     // broadcast when a user connects
-    socket.broadcast.to(roomDetail.roomId).emit(RoomEvent.JOINED_ROOM, {userId,roomDetail});
-    io.to(roomDetail.roomId).emit(RoomEvent.JOINED_ROOM, {userId,roomDetail});
+    socket.broadcast.emit(RoomEvent.JOINED_ROOM, {userId,roomInfo});
+    // send back to participant
+    socket.emit(RoomEvent.JOINED_ROOM, {userId,roomInfo});
+    // Navigate to the room
+    socket.emit(RoomEvent.NAVIGATE,{userId,roomInfo})
   });
 
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: RoomActs) => {
@@ -75,10 +81,10 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   });
    /**Video on play */
    socket.on(RoomEvent.SELECT_VIDEO,({videoOnPlay, roomId})=>{
-     setVideoOnPlay(videoOnPlay,roomId,)
+     const res = setVideoOnPlay(videoOnPlay,roomId,)
      console.log(videoOnPlay)
     //broadcast to room except admin
-    io.to(roomId).emit(RoomEvent.VIDEO_ONPLAY,videoOnPlay)
+    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY,res.videoOnPlay)
   })
 })
 

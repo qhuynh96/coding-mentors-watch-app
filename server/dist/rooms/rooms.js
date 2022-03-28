@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = exports.setVideoOnPlay = void 0;
 var rooms = [];
-var setVideoOnPlay = function (videoOnplay, roomId) {
-    rooms.forEach(function (room) { return (room.roomId === roomId) && (room.onPlay = videoOnplay); });
+var setVideoOnPlay = function (videoOnPlay, roomId) {
+    rooms.forEach(function (room) { return (room.roomId === roomId) && (room.onPlay = videoOnPlay); });
+    return { videoOnPlay: videoOnPlay, roomId: roomId };
 };
 exports.setVideoOnPlay = setVideoOnPlay;
 var getRooms = function () {
@@ -36,8 +37,8 @@ var joinRoom = function (_a) {
         }
         // TODO: add error handling (case: roomId doesn't exist)
     });
-    var roomDetail = rooms.filter(function (room) { return room.roomId === roomId; })[0];
-    return { userId: userId, roomDetail: roomDetail };
+    var roomInfo = rooms.filter(function (room) { return room.roomId === roomId; })[0];
+    return { userId: userId, roomInfo: roomInfo };
 };
 exports.joinRoom = joinRoom;
 var leaveRoom = function (_a) {

@@ -20,9 +20,9 @@ export interface RoomActs {
 
 const rooms: Array<Room> = [];
 
-export const setVideoOnPlay = (videoOnplay: VideoProps, roomId: string) =>{
-  rooms.forEach((room: Room)=>(room.roomId ===roomId) && (room.onPlay = videoOnplay) )
-  
+export const setVideoOnPlay = (videoOnPlay: VideoProps, roomId: string) =>{
+  rooms.forEach((room: Room)=>(room.roomId ===roomId) && (room.onPlay = videoOnPlay) )
+  return {videoOnPlay,roomId}
 }
 
 export const getRooms = () => {
@@ -54,9 +54,9 @@ export const joinRoom =({ userId, roomId }: RoomActs) => {
     }
     // TODO: add error handling (case: roomId doesn't exist)
   });
-  const roomDetail = rooms.filter((room)=>room.roomId ===roomId)[0]
+  const roomInfo = rooms.filter((room)=>room.roomId ===roomId)[0]
 
-  return { userId, roomDetail };
+  return { userId, roomInfo };
 };
 
 export const leaveRoom = ({ userId, roomId }: RoomActs) => {};

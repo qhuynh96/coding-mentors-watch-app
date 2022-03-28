@@ -1,34 +1,21 @@
-import React, { useRef, } from "react";
-import { useEffect } from "react";
-import { useCallback } from "react";
+import React, { useRef,useCallback } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../context/RoomsContext";
+import { RoomEvent } from "../RoomEvent";
 
 interface IProps {
+  isAdmin: boolean
+  videoOnPlay: IVideo 
   url: string
   socket: Socket
-  isAdmin: boolean
-  roomId?: string
-  videoOnPlay: IVideo 
-  userId: string
+  roomId: string
 }
 
 const VideoDetail = (props: IProps) => {
-  const {  isAdmin,  videoOnPlay,userId} = props;
+  const {  isAdmin,videoOnPlay,socket,roomId} = props;
   const playerRef = useRef<any>();
-  /**Handle Player */
-  // const handlePlay = useCallback(() => {
-  //   setVideoOnPlay((prev: any) => ({
-  //     ...prev,
-  //     playing: true,
-  //     playAt: prev.playAt === 0 ? new Date().getTime() : prev.playAt,
-  //   }));
-  // }, []);
-  // const handlePause = () => {
-  //   setVideoOnPlay((prev: any) => ({ ...prev, playing: false }));
-  // };
-
+  
   /**Pause time calculation*/
   //Use pause period and start time (in second) so we can calculate playing time of movie => solve delay at server
   // useEffect(() => {
@@ -49,36 +36,15 @@ const VideoDetail = (props: IProps) => {
   //     };
   //   }
   // }, [videoOnPlay.playing]);
-
-  /**Youtube automatically plays at a memorised time so I set initial playling false and when we play video it will start at 0 */
-  /**If anyone have another idea, please share */
-  // useEffect(() => {
-  //   if (playerRef.current) {
-  //     playerRef.current.seekTo(
-  //       videoOnPlay.playAt === 0
-  //         ? 0
-  //         : (new Date().getTime() - videoOnPlay.playAt) / 1000 -
-  //             videoOnPlay.pause
-  //     );
-  //     playerRef.current.player.isPlaying = true;
-  //   }
-  // }, [videoOnPlay.playing]);
-
-  // useEffect(() => {
-  //   socket.on(RoomEvent.VIDEO_ONPLAY, (videoOnPlay) => {
-  //     !isAdmin && setVideoOnPlay(videoOnPlay)
-  //   });
-  //   console.log("first");
-  // }, []);
-  useEffect(()=>{
-    let time = new Date().getTime()
-    console.log((time - videoOnPlay.playAt)/1000 -videoOnPlay.pause)
-  },[userId])
- 
+  
   const onReady = useCallback(() => {
     /**Reset video figures when a new video is ready */
-    playerRef.current.seekTo(0);
-    console.log(videoOnPlay)
+    playerRef.current.seekTo(0)
+    /**set Time play at for new participant */
+    let time = new Date().getTime()
+    playerRef.current.seekTo((time - videoOnPlay.playAt)/1000 - videoOnPlay.pause)
+    socket.emit(RoomEvent.SELECT_VIDEO,({videoOnPlay, roomId}))
+
   }, [videoOnPlay.url]);
 
   console.log(videoOnPlay)

@@ -12,8 +12,9 @@ type Props = {
   socket: Socket
 };
 
-interface CustomState {
+interface ICustomState {
   userId: string
+  roomInfo: RoomProps
 }
 
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
@@ -22,37 +23,29 @@ const NewRoom: FC<Props> = ({ socket }) => {
   // TODO: define other socket events (for watching Youtube together/chatting)
   const { roomId } = useParams()  
   const location = useLocation()
-  const state = location.state as CustomState
-  const [isAdmin,setIsAdmin]= useState(true)
-  const {userId} = state
-  useEffect(()=>{
-    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomDetail }) => {
-      setIsAdmin(state.userId === roomDetail.admin)
-      setVideoOnPlay({...roomDetail.onPlay})
-      console.log(roomDetail)
-    });
-  },[userId])
+  const state = location.state as ICustomState
+  const {userId,roomInfo} = state
+  const isAdmin = useMemo(()=> userId === roomInfo.admin,[userId,roomInfo.admin])
+  const [videoOnPlay, setVideoOnPlay] = useState<any>({} )
 
-  useEffect(()=>{
-    socket.on(RoomEvent.VIDEO_ONPLAY,(videoOnPlay)=>{
-      setVideoOnPlay(videoOnPlay)
-    })
-  },[socket])
-  
-  const [videoOnPlay, setVideoOnPlay] = useState<IVideo>({} as IVideo)
-
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>("https://www.youtube.com/watch?v=_4kHxtiuML0&t=8635s&ab_channel=GreenredProductions-RelaxingMusic");
   const [videos, setVideos] = useState<string[]>([]);
-  //DO we need to set selectedVideo or ju
+
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   
   const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
-  
   useEffect(()=>{
-    if (videoOnPlay !== {} as IVideo) {socket.emit(RoomEvent.SELECT_VIDEO,({videoOnPlay, roomId}))}
-  },[selectedVideo])
-  let searchId: string;
+    setVideoOnPlay(roomInfo.onPlay)
+    console.log('first')
+  },[userId])
 
+  useEffect(()=>{    
+    socket.on(RoomEvent.VIDEO_ONPLAY,(videoOnPlay)=>{
+      setVideoOnPlay(videoOnPlay)
+    })
+  },[selectedVideo])
+  
+  let searchId: string;
   
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,7 +78,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
         </div>
         <div className="ui row">
           <form className="ten wide column">
-            <VideoDetail userId={userId} isAdmin={isAdmin} videoOnPlay={videoOnPlay}  socket={socket} url={url}  />
+            <VideoDetail roomId={roomInfo.roomId} socket={socket} isAdmin={isAdmin} videoOnPlay={videoOnPlay} url={url} />
           </form>
           <div
             className="four wide column"

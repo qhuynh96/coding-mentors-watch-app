@@ -1,11 +1,10 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-
 import { v4 as uuidv4 } from "uuid";
 import { Socket } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
 import { RoomEvent } from "../RoomEvent";
-import { RoomProps, RoomsContext } from "../context/RoomsContext";
+import { RoomsContext } from "../context/RoomsContext";
 type Props = {
   socket: Socket;
 };
@@ -20,28 +19,32 @@ function HomePage({ socket }: Props) {
   
   const createRoom = useCallback(() => {
     socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId });    
-  }, [userId,socket]);
+  }, [socket]);
 
   const joinRoom = useCallback(() => {
-    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID });
-    navigate(`/room/${inputRoomID}`,{state: {userId}});
-  }, [inputRoomID, socket,userId]);
+    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID,userId });
+  }, [inputRoomID, socket]);
   
-  useEffect(()=>{
+  useEffect(() => {    
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
       setUserId(userId);
       getRooms && getRooms(rooms);
     });
-  },[socket])
 
-  useEffect(() => {    
     socket.on(RoomEvent.CREATED_ROOM, ({newRoom}) => {
       addNewRoom && addNewRoom(newRoom);
-      //To prevent navigating all clients to new room, we put a condition
-      userId === newRoom.admin && navigate(`/room/${newRoom.roomId}`,{state: {userId}});  
     });
+
+    socket.on(RoomEvent.JOINED_ROOM,({userId,roomInfo})=>{
+      // TODO: add userId into context for homepage display
+    })
+
+    //Navigate only one person 
+    socket.on(RoomEvent.NAVIGATE,({userId, roomInfo})=>{
+      navigate(`/room/${roomInfo.roomId}`,{state: {userId,roomInfo}});  
+    })
     
-  }, [userId]);
+  }, [addNewRoom,getRooms,socket,navigate]);
 
   
   return (

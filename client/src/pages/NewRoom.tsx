@@ -1,4 +1,4 @@
-import { FC, FormEvent, useState,useMemo } from "react";
+import { FC, FormEvent, useState, useMemo } from "react";
 import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
@@ -9,44 +9,46 @@ import { useEffect } from "react";
 import { RoomEvent } from "../RoomEvent";
 
 type Props = {
-  socket: Socket
+  socket: Socket;
 };
 
 interface ICustomState {
-  userId: string
-  roomInfo: RoomProps
+  userId: string;
+  roomInfo: RoomProps;
 }
 
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
 
 const NewRoom: FC<Props> = ({ socket }) => {
   // TODO: define other socket events (for watching Youtube together/chatting)
-  const { roomId } = useParams()  
-  const location = useLocation()
-  const state = location.state as ICustomState
-  const {userId,roomInfo} = state
-  const isAdmin = useMemo(()=> userId === roomInfo.admin,[userId,roomInfo.admin])
-  const [videoOnPlay, setVideoOnPlay] = useState<any>({} )
+  const { roomId } = useParams();
+  const location = useLocation();
+  const state = location.state as ICustomState;
+  const { userId, roomInfo } = state;
+  const isAdmin = useMemo(
+    () => userId === roomInfo.admin,
+    [userId, roomInfo.admin]
+  );
+  const [playingVideo, setPlayingVideo] = useState<any>({});
 
-  const [search, setSearch] = useState<string>("https://www.youtube.com/watch?v=_4kHxtiuML0&t=8635s&ab_channel=GreenredProductions-RelaxingMusic");
+  const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
 
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  
-  const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
-  useEffect(()=>{
-    setVideoOnPlay(roomInfo.onPlay)
-    console.log('first')
-  },[userId])
 
-  useEffect(()=>{    
-    socket.on(RoomEvent.VIDEO_ONPLAY,(videoOnPlay)=>{
-      setVideoOnPlay(videoOnPlay)
-    })
-  },[selectedVideo])
-  
+  const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
+  useEffect(() => {
+    setPlayingVideo(roomInfo.onPlay);
+  }, [userId]);
+
+  useEffect(() => {
+    socket.on(RoomEvent.VIDEO_ONPLAY, (videoOnPlay) => {
+      setPlayingVideo(videoOnPlay);
+    });
+  }, [selectedVideo, socket]);
+
   let searchId: string;
-  
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     searchId = search.includes("&")
@@ -55,7 +57,12 @@ const NewRoom: FC<Props> = ({ socket }) => {
 
     if (!selectedVideo) {
       setSelectedVideo(searchId);
-      setVideoOnPlay({url: `${BASE_YOUTUBE_API_URL}${searchId}`, playing: true, playAt: new Date().getTime(), pause: 0})
+      setPlayingVideo({
+        url: `${BASE_YOUTUBE_API_URL}${searchId}`,
+        playing: true,
+        playAt: new Date().getTime(),
+        pause: 0,
+      });
     } else {
       setVideos([...videos, searchId]);
     }
@@ -78,7 +85,13 @@ const NewRoom: FC<Props> = ({ socket }) => {
         </div>
         <div className="ui row">
           <form className="ten wide column">
-            <VideoDetail roomId={roomInfo.roomId} socket={socket} isAdmin={isAdmin} videoOnPlay={videoOnPlay} url={url} />
+            <VideoDetail
+              roomId={roomInfo.roomId}
+              socket={socket}
+              isAdmin={isAdmin}
+              playingVideo={playingVideo}
+              url={url}
+            />
           </form>
           <div
             className="four wide column"

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = exports.setVideoOnPlay = void 0;
 var rooms = [];
 var setVideoOnPlay = function (videoOnPlay, roomId) {
-    rooms.forEach(function (room) { return (room.roomId === roomId) && (room.onPlay = videoOnPlay); });
+    rooms.forEach(function (room) { return room.roomId === roomId && (room.onPlay = videoOnPlay); });
     return { videoOnPlay: videoOnPlay, roomId: roomId };
 };
 exports.setVideoOnPlay = setVideoOnPlay;

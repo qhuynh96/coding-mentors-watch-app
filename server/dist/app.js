@@ -43,7 +43,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         });
         // join the new room
         socket.join(roomId);
-        // broadcast an new Room except 
+        // broadcast an new Room except
         socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
         // send back to room creator
         socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });

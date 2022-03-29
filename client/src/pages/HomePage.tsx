@@ -7,42 +7,37 @@ import { RoomEvent } from "../RoomEvent";
 import { RoomsContext } from "../context/RoomsContext";
 type Props = {
   socket: Socket;
+  auth: string | null;
 };
 
-function HomePage({ socket }: Props) {
+function HomePage({ socket, auth }: Props) {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(null);
   const [inputRoomID, setInputRoomID] = useState<string>("");
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
 
   const createRoom = useCallback(() => {
-    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId });
+    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId: auth });
   }, [socket]);
 
   const joinRoom = useCallback(() => {
-    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID, userId });
+    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID, userId: auth });
   }, [inputRoomID, socket]);
 
   useEffect(() => {
-    socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
-      setUserId(userId);
-      getRooms && getRooms(rooms);
-    });
+    socket.on(RoomEvent.CREATED_ROOM, ({ userId, newRoom }) => {
+      addNewRoom && addNewRoom(newRoom);
 
-    socket.on(RoomEvent.CREATED_ROOM, ({ userId, roomInfo }) => {
-      addNewRoom && addNewRoom(roomInfo);
-      //TODOs: should we navigate user with condition and remove RoomEvent.NAVIGATE
-      // userId === userId && navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
+      auth === userId &&
+        navigate(`/room/${newRoom.roomId}`, {
+          state: { userId, roomInfo: newRoom },
+        });
     });
 
     socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomInfo }) => {
-      //TODOs: same navigate event at RoomEvent.JOINED_ROOM
       // TODOs: add roomInfo into context for homepage display
-    });
 
-    //Navigate only one person
-    socket.on(RoomEvent.NAVIGATE, ({ userId, roomInfo }) => {
-      navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
+      auth === userId &&
+        navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
     });
   }, [addNewRoom, getRooms, socket, navigate]);
 

@@ -29,7 +29,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
     () => userId === roomInfo.admin,
     [userId, roomInfo.admin]
   );
-  const [playingVideo, setPlayingVideo] = useState<any>({});
+  const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
 
   const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
@@ -61,7 +61,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
         url: `${BASE_YOUTUBE_API_URL}${searchId}`,
         playing: true,
         playAt: new Date().getTime(),
-        pause: 0,
+        totalOffsetTime: 0,
       });
     } else {
       setVideos([...videos, searchId]);

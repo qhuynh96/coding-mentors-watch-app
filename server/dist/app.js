@@ -11,7 +11,6 @@ var cors_1 = __importDefault(require("cors"));
 var cookie_parser_1 = __importDefault(require("cookie-parser"));
 var morgan_1 = __importDefault(require("morgan"));
 var RoomEvent_1 = require("./RoomEvent");
-var uuid_1 = require("uuid");
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
 var app = (0, express_1.default)();
@@ -29,8 +28,7 @@ var io = new socket_io_1.Server(server, {
 // run once the client connects
 io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     var rooms = (0, rooms_1.getRooms)();
-    //TODO Khang: change userId : uuid (install uuid)
-    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms, userId: (0, uuid_1.v4)() });
+    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms });
     socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         // create a new room & append it to the current room array
@@ -47,8 +45,6 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
         // send back to room creator
         socket.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
-        // Navigate to new room
-        socket.emit(RoomEvent_1.RoomEvent.NAVIGATE, { userId: userId, roomInfo: newRoom });
     });
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
@@ -59,8 +55,6 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
         // send back to participant
         socket.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
-        // Navigate to the room
-        socket.emit(RoomEvent_1.RoomEvent.NAVIGATE, { userId: userId, roomInfo: roomInfo });
     });
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
@@ -68,11 +62,10 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     });
     /**Video on play */
     socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
-        var videoOnPlay = _a.videoOnPlay, roomId = _a.roomId;
-        var res = (0, rooms_1.setVideoOnPlay)(videoOnPlay, roomId);
-        console.log(videoOnPlay);
-        //broadcast to room except admin
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, res.videoOnPlay);
+        var playingVideo = _a.playingVideo, roomId = _a.roomId;
+        var res = (0, rooms_1.setVideoOnPlay)(playingVideo, roomId);
+        //broadcast video to roomID
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, res.playingVideo);
     });
 });
 app.use((0, morgan_1.default)("dev"));

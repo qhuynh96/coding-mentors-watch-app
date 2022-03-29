@@ -27,14 +27,14 @@ export const RoomsContext = createContext<RoomsContextInterface>({});
 export const RoomsContextProvider: FC<ReactNode> = ({ children }) => {
   const [rooms, setRooms] = useState<RoomProps[]>([]);
 
-  const getRooms = useCallback((rooms: RoomProps[]): void => {
+  const getRooms = useCallback((rooms: RoomProps[]) => {
     setRooms(rooms);
   }, []);
 
-  const addNewRoom = useCallback((room: RoomProps): void => {
+  const addNewRoom = useCallback((room: RoomProps)=> {
     setRooms([...rooms, room]);
   }, []);
-  const playVideo = useCallback((videoOnPlay: IVideo, roomId: string): void => {
+  const playVideo = useCallback((videoOnPlay: IVideo, roomId: string) => {
     setRooms(
       rooms.map((r: RoomProps) =>
         r.roomId === roomId ? { ...r, onPlay: videoOnPlay } : r

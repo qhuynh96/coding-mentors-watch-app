@@ -20,11 +20,11 @@ export interface RoomActs {
 
 const rooms: Array<Room> = [];
 
-export const setVideoOnPlay = (videoOnPlay: VideoProps, roomId: string) => {
+export const setVideoOnPlay = (playingVideo: VideoProps, roomId: string) => {
   rooms.forEach(
-    (room: Room) => room.roomId === roomId && (room.onPlay = videoOnPlay)
+    (room: Room) => room.roomId === roomId && (room.onPlay = playingVideo)
   );
-  return { videoOnPlay, roomId };
+  return { playingVideo, roomId };
 };
 
 export const getRooms = () => {

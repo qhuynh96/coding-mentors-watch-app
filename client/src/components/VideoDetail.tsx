@@ -74,8 +74,9 @@ const VideoDetail = (props: IProps) => {
 
   const onReady = useCallback(() => {
     playerRef.current && playerRef.current.seekTo(processTime);
-
-    socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
+    //if no video selected, everyone can secect video, otherwise only admin
+    (isAdmin || !playingVideo.url) &&
+      socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
 
   if (!playingVideo.url) {

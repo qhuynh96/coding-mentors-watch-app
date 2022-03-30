@@ -1,10 +1,9 @@
-import React, { useRef, useCallback } from "react";
-import { useMemo } from "react";
+import React, { useRef, useCallback,useMemo} from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";
-
+import VideoControl from "./videoControl/VideoControl";
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
@@ -18,8 +17,8 @@ type processTime = number; // second
 const VideoDetail = (props: IProps) => {
   const { isAdmin, playingVideo, socket, roomId } = props;
   const playerRef = useRef<ReactPlayer | null>(null);
-  //joinedTime is the time when a user start wathching
-  //joinedTime will reset every movie url set up
+  // joinedTime is the time when a user start wathching
+  // joinedTime will reset every movie url set up
   const joinedTime = useMemo<number>(
     () => new Date().getTime(),
     [playingVideo.url]
@@ -74,27 +73,35 @@ const VideoDetail = (props: IProps) => {
 
   const onReady = useCallback(() => {
     playerRef.current && playerRef.current.seekTo(processTime);
-    //if no video selected, everyone can secect video, otherwise only admin
-    (isAdmin || !playingVideo.url) &&
-      socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
+
+    socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
 
   if (!playingVideo.url) {
     return <div className="ui embed ">...loading</div>;
   }
+
   return (
     <div className="ui embed ">
+      <div>
       <ReactPlayer
+        className="reactplayer"
         ref={playerRef}
         url={playingVideo.url}
-        controls={true}
+        controls={false}
         playing={playingVideo.playing}
         onReady={onReady}
         // TODOS: onPlay={handlePlay}
         // TODOS: onPause={handlePause}
-        style={{ pointerEvents: `${(!isAdmin && "none") || "auto"}` }}
       />
+      <div className="controlWrapper">
+        <VideoControl/>
+      </div>
+
+      </div>
+      
     </div>
+
   );
 };
 

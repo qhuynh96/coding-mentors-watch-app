@@ -87,6 +87,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get ("/watch-app/user",(async (req,res)=>{
+  try {
+      const userId = await uuidv4()
+  res.status(200).json(userId)
+  } catch (err) {
+    throw err
+  }
+}) as RequestHandler)
+
 app.get("/watch-app", ((req, res) => {
   res.status(200).json({
     message: "Successfully connected to ExpressJS server!",

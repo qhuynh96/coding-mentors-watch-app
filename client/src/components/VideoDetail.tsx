@@ -3,7 +3,6 @@ import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";
-import VideoControl from "./videoControl/VideoControl";
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
@@ -94,10 +93,6 @@ const VideoDetail = (props: IProps) => {
         // TODOS: onPlay={handlePlay}
         // TODOS: onPause={handlePause}
       />
-      <div className="controlWrapper">
-        <VideoControl/>
-      </div>
-
       </div>
       
     </div>

@@ -8,14 +8,21 @@ import NewRoom from "./pages/NewRoom";
 import NotFound from "./pages/NotFound";
 import { useStorage } from "./hooks/useStorage";
 import { v4 as uuidv4 } from "uuid";
+import { serverAxios } from "./api/server";
+import axios from "axios";
+import { useCallback } from "react";
 
 type Props = {
   socket: Socket;
 };
 
 function App({ socket }: Props) {
-  const [auth] = useStorage("userId", uuidv4());
-
+  const getUserId = async () => {
+    const res = await serverAxios.get("/watch-app/user");
+    return res.data;
+  };
+  //store in browser
+  const [auth] = useStorage("userId", getUserId());
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
 
   useEffect(() => {

@@ -38,7 +38,7 @@ function HomePage({ socket, auth }: Props) {
       auth === userId &&
         navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
     });
-  }, [addNewRoom, getRooms, socket, navigate]);
+  }, [addNewRoom, getRooms, socket, navigate,auth]);
 
   return (
     <div

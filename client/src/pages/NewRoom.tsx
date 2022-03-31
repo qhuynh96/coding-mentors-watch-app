@@ -2,7 +2,7 @@ import { FC, FormEvent, useState, useMemo } from "react";
 import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-import VideoDetail from "../components/VideoDetail";
+import VideoDetail from "../components/videoDetail/VideoDetail";
 import VideoList from "../components/VideoList";
 import { IVideo, RoomProps } from "../context/RoomsContext";
 import { useEffect } from "react";
@@ -31,12 +31,24 @@ const NewRoom: FC<Props> = ({ socket }) => {
   );
   const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
 
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>(
+    "https://www.youtube.com/watch?v=Q5OIg6nmeU4&ab_channel=FUNNYANIMALS"
+  );
   const [videos, setVideos] = useState<string[]>([]);
 
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
+  const updateplayingVideo = () => {
+    const newUpdate = {
+      url: "",
+      playing: true,
+      lastModifiedVideoAtTimeX: new Date().getTime(),
+      playedSecondsAtTimeX: 0,
+      totalOffsetTime: 0,
+    };
+  };
+
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
   }, [userId]);
@@ -69,6 +81,9 @@ const NewRoom: FC<Props> = ({ socket }) => {
     setSearch("");
   };
 
+  const handlePlay = () => {
+    setPlayingVideo({ ...playingVideo, playing: !playingVideo.playing });
+  };
   return (
     <div className="ui segment">
       <div className="ui grid">
@@ -86,6 +101,7 @@ const NewRoom: FC<Props> = ({ socket }) => {
         <div className="ui row">
           <form className="ten wide column">
             <VideoDetail
+              handlePlay={handlePlay}
               roomId={roomInfo.roomId}
               socket={socket}
               isAdmin={isAdmin}

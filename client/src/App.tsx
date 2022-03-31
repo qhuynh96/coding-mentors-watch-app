@@ -25,6 +25,7 @@ function App({ socket }: Props) {
     };
     getUserId();
   }, []);
+
   useEffect(() => {
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms }) => {
       getRooms && getRooms(rooms);

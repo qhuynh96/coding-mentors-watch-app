@@ -1,4 +1,5 @@
 import React from "react";
+import "./videoList.css"
 
 interface IProps {
   video: string[];
@@ -6,10 +7,10 @@ interface IProps {
 
 const VideoList = ({ video }: IProps) => {
   return (
-    <div className="column" style={{ border: "1px solid black" }}>
+    <div className="video-list" style={{ border: "1px solid black" }}>
       {video.map((item) => (
-        <div className="video-item item " key={item}>
-          {item}
+        <div className="video-item" key={item}>
+          <img src={`https://img.youtube.com/vi/${item}/sddefault.jpg`} alt="" /> 
         </div>
       ))}
     </div>

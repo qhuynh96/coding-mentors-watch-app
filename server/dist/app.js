@@ -101,8 +101,14 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
         var playingVideo = _a.playingVideo, roomId = _a.roomId;
         var res = (0, rooms_1.setVideoOnPlay)(playingVideo, roomId);
-        //broadcast video to roomID
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, res.playingVideo);
+        //broadcast video to roomID except sender
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, { playingVideo: playingVideo });
+    });
+    socket.on(RoomEvent_1.RoomEvent.VIDEO_UPDATING, function (_a) {
+        var videoUpdate = _a.videoUpdate, roomId = _a.roomId;
+        var res = (0, rooms_1.setVideoOnPlay)(videoUpdate, roomId);
+        //broadcast video to roomID except sender
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
     });
 });
 app.use((0, morgan_1.default)("dev"));

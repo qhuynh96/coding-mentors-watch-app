@@ -8,9 +8,16 @@ import { IVideo, RoomProps } from "../context/RoomsContext";
 import { useEffect } from "react";
 import { RoomEvent } from "../RoomEvent";
 
-type Props = {
+interface IProps {
   socket: Socket;
-};
+}
+
+export interface IVideoUpdate {
+  url: string;
+  playing: boolean;
+  latestUpdateAt?: number;
+  progress: number;
+}
 
 interface ICustomState {
   userId: string;
@@ -19,7 +26,7 @@ interface ICustomState {
 
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
 
-const NewRoom: FC<Props> = ({ socket }) => {
+const NewRoom: FC<IProps> = ({ socket }) => {
   // TODO: define other socket events (for watching Youtube together/chatting)
   const { roomId } = useParams();
   const location = useLocation();
@@ -32,32 +39,29 @@ const NewRoom: FC<Props> = ({ socket }) => {
   const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
 
   const [search, setSearch] = useState<string>(
-    "https://www.youtube.com/watch?v=Q5OIg6nmeU4&ab_channel=FUNNYANIMALS"
+    ""
   );
   const [videos, setVideos] = useState<string[]>([]);
 
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
-  const url = `${BASE_YOUTUBE_API_URL}${selectedVideo}`;
-  const updateplayingVideo = () => {
-    const newUpdate = {
-      url: "",
-      playing: true,
-      lastModifiedVideoAtTimeX: new Date().getTime(),
-      playedSecondsAtTimeX: 0,
-      totalOffsetTime: 0,
-    };
+  const updateVideo = (videoUpdate: IVideo) => {
+    setPlayingVideo(videoUpdate);
+    socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
   };
+
+  useEffect(() => {
+    socket.on(RoomEvent.VIDEO_UPDATED, ({updatedVideo}) => {
+      setPlayingVideo(updatedVideo);
+    });
+    socket.on(RoomEvent.VIDEO_ONPLAY, ({playingVideo}) => {
+      setPlayingVideo(playingVideo);
+    });
+  }, [socket]);
 
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
   }, [userId]);
-
-  useEffect(() => {
-    socket.on(RoomEvent.VIDEO_ONPLAY, (videoOnPlay) => {
-      setPlayingVideo(videoOnPlay);
-    });
-  }, [selectedVideo, socket]);
 
   let searchId: string;
 
@@ -72,8 +76,8 @@ const NewRoom: FC<Props> = ({ socket }) => {
       setPlayingVideo({
         url: `${BASE_YOUTUBE_API_URL}${searchId}`,
         playing: true,
-        playAt: new Date().getTime(),
-        totalOffsetTime: 0,
+        latestUpdateAt: new Date().getTime() / 1000,
+        progress: 0,
       });
     } else {
       setVideos([...videos, searchId]);
@@ -81,9 +85,6 @@ const NewRoom: FC<Props> = ({ socket }) => {
     setSearch("");
   };
 
-  const handlePlay = () => {
-    setPlayingVideo({ ...playingVideo, playing: !playingVideo.playing });
-  };
   return (
     <div className="ui segment">
       <div className="ui grid">
@@ -101,12 +102,11 @@ const NewRoom: FC<Props> = ({ socket }) => {
         <div className="ui row">
           <form className="ten wide column">
             <VideoDetail
-              handlePlay={handlePlay}
               roomId={roomInfo.roomId}
               socket={socket}
               isAdmin={isAdmin}
               playingVideo={playingVideo}
-              url={url}
+              updateVideo={updateVideo}
             />
           </form>
           <div

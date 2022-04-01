@@ -76,9 +76,14 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   /**Video on play */
   socket.on(RoomEvent.SELECT_VIDEO, ({ playingVideo, roomId }) => {
     const res = setVideoOnPlay(playingVideo, roomId);
-    //broadcast video to roomID
-    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, res.playingVideo);
+    //broadcast video to roomID except sender
+    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, {playingVideo});
   });
+  socket.on(RoomEvent.VIDEO_UPDATING,({videoUpdate,roomId})=>{
+    const res = setVideoOnPlay(videoUpdate, roomId);
+    //broadcast video to roomID except sender
+    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_UPDATED,{updatedVideo: videoUpdate});
+  })
 });
 
 app.use(logger("dev"));

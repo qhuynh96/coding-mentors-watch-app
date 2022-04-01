@@ -23,7 +23,7 @@ export const VideoProgressSlider = styled(Slider)({
     },
   },
   "& .MuiSlider-valueLabel": {
-    // display: 'none',
+    display: 'none',
   },
 });
 

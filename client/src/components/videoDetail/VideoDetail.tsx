@@ -1,17 +1,23 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
 import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../videoControl/VideoControl";
+import screenful from "screenfull";
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
-  url: string;
   socket: Socket;
   roomId: string;
-  handlePlay: () => void;
+  updateVideo: (videoUpdate: IVideo) => void;
 }
 
 export interface IVideoFigures {
@@ -40,64 +46,38 @@ const initailFirgure = {
 };
 
 const VideoDetail = (props: IProps) => {
-  const { isAdmin, playingVideo, socket, roomId, handlePlay } = props;
+  const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
   const [videoFigures, setVideoFigures] =
     useState<IVideoFigures>(initailFirgure);
-  const playerRef = useRef<ReactPlayer | null>(null);
-  // joinedTime is the time when a user start wathching
-  // joinedTime will reset every movie url set up
-  const joinedTime = useMemo<number>(
-    () => new Date().getTime(),
-    [playingVideo.url]
+  const [duration,setDuration] = useState<number>(0)
+  const playerRef = useRef<any>(null);
+  const videoContainerRef = useRef<any>()
+  /** latestTimeGetVideo : time users get latest update of movie from server */
+  const latestTimeGetVideo = useMemo<number>(
+    () => new Date().getTime() / 1000,
+    [playingVideo]
   );
-  // ProgressTime is the time in millisecond/second that the video has been progressed.
+  // ProgressTime is the time in second that the video has been progressed.
   // It is calculated from the formula:
   //
-  // ProgressTime = VideoPlayTime - JoinedTime - Sum of Offset Time
+  // ProgressTime = latestTimeGetVideo - latestVideoUpdateAt + Video progress at latestUpdate
   //
-  //   ---------v-----------------------v-------->
-  //            t1                      t2
-  //                 |***|        |**|
-  //                  t3           t3'
-  //   t1 : Video playedSeconds at
-  //   t2 : User started watching movie
-  //   t3 : Pause time 1
-  //   t3': Pause time 2
+  //   ---------v--------------v---------v-------->
+  //            t0             t1         t2
+  //                --t'1--
   //
-  //   ProgressTime =JoinedTime - VideoPlayTime  - Sum of Offset Time
-  //                = t2 - t1 - (t3 + t3');
+  //   t1 : time of the lastest video event (start, seekTo, play & pause)
+  //   t0 : time start video
+  //   t'1 : video progress at latestUpdate (after event calculation)
+  //   t2: time users get lastest movie update from server
   //
-  // What is the total offset time?
-  // The offset time is accumulated when one of the following events happen:
-  //      * The video is pause. The offset time is increased by an amount of the pause time
-  //      * The video jump to an arbitrary point in time.
-  //              1. If the video jumps ahead of time. The offset is decreased by the amount of the jumping time
-  //              2. If the video jumps back of time. The offset is increased by the amount of the jumping time
+  //   ProgressTime =latestTimeGetVideo - latestVideoUpdateAt + Video progress at latestUpdate
+  //                = t2 - t1 + t'1
 
   const processTime: processTime =
-    (joinedTime - playingVideo.playAt - playingVideo.totalOffsetTime) / 1000;
+    latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
 
-  /**TODOs: Pause time calculation*/
-  //Use pause period and start time (in second) so we can calculate playing time of movie => solve delay at server
-  // useEffect(() => {
-  //   if (videoOnPlay.playing === false) {
-  //     const Calc = () => {
-  //       setVideoOnPlay((prev: any) => ({
-  //         ...prev,
-  //         pause:
-  //           prev.playing === true ? complete(prev.pause) : prev.pause + 0.5,
-  //       }));
-  //     };
-  //     let timer: any = setInterval(Calc, 500);
-
-  //     const complete = (pause: any) => {
-  //       clearInterval(timer);
-  //       timer = null;
-  //       return pause;
-  //     };
-  //   }
-  // }, [videoOnPlay.playing]);
-
+  /**Handle video events */
   const handleMute = () => {
     setVideoFigures({ ...videoFigures, muted: !videoFigures.muted });
   };
@@ -117,60 +97,85 @@ const VideoDetail = (props: IProps) => {
   };
 
   const handleIsSeekingTo = () => {
-    setVideoFigures({...videoFigures, isSeekingTo:true})
+    setVideoFigures({ ...videoFigures, isSeekingTo: true });
   };
 
   const handleSeekToChange = (e: any, newValue: number) => {
-    setVideoFigures({...videoFigures,playedSeconds: newValue })
+    setVideoFigures({ ...videoFigures, playedSeconds: newValue });
   };
 
   const handleSeekToMouseUp = (e: any, newValue: number) => {
-    setVideoFigures({...videoFigures, isSeekingTo: false})
-    playerRef.current && playerRef.current.seekTo(newValue )
-    
+    playerRef.current && playerRef.current.seekTo(newValue);
+    setVideoFigures({ ...videoFigures,playedSeconds: newValue, isSeekingTo: false });
+    const videoUpdate = {
+      ...playingVideo,
+      progress: newValue,
+      latestUpdateAt: (new Date().getTime() / 1000),
+    };
+    updateVideo(videoUpdate);
   };
 
-  const onReady = useCallback(() => {
-    playerRef.current && playerRef.current.seekTo(processTime);
+  const handlePlayPause = () => {
+    const progress = playerRef.current!.getCurrentTime();
+    const videoUpdate = {
+      ...playingVideo,
+      progress: progress,
+      latestUpdateAt: (new Date().getTime() / 1000),
+      playing: !playingVideo.playing,
+    };
+    updateVideo(videoUpdate);
+  };
 
+  const handleProgress = useCallback((changingState: changingState) => {
+    if (!videoFigures.isSeekingTo) {
+      setVideoFigures({
+        ...videoFigures,
+        ...changingState,
+      });
+    }
+  },[videoFigures.playedSeconds]);
+
+  const handleFullScreen = () =>{
+    videoContainerRef.current && screenful.toggle(videoContainerRef.current)
+  }
+  const onReady = useCallback(() => {    
     socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
 
-  const onProgress = (changingState: changingState) => {
-    setVideoFigures({
-      ...videoFigures,
-     ...changingState,
-    });
-  };
+  const onDuration= useCallback((duration: number)=>{
+    setDuration(duration)
+  },[playingVideo.url])
+
+  useEffect(() => {
+    playerRef.current && playerRef.current.seekTo(processTime);
+  }, [playingVideo]);
 
   if (!playingVideo.url) {
     return (
-      <div className="ui embed relative">
+      <div className="ui embed ">
         <p>...loading</p>
       </div>
     );
   }
 
   return (
-    <div className="ui embed relative">
+    <div ref={videoContainerRef} className="ui embed ">
       <ReactPlayer
         className="reactplayer"
         ref={playerRef}
         url={playingVideo.url}
-        controls={false}
-        onDuration={(duration) =>
-          setVideoFigures({ ...videoFigures, duration: duration })
-        }
+        controls={false}        
         playing={playingVideo.playing}
         onReady={onReady}
-        onProgress={onProgress}
+        onProgress={handleProgress}
+        onDuration={onDuration}
         volume={videoFigures.volume}
         muted={videoFigures.muted}
-        // TODOS: onPlay={handlePlay}
-        // TODOS: onPause={handlePause}
+        style={{ pointerEvents: "none"}}
       />
-      <VideoControlWrapper>
+      <VideoControlWrapper >
         <VideoControl
+          handleFullScreen={handleFullScreen}
           isAdmin={isAdmin}
           handleVolumeMouseUp={handleVolumeMouseUp}
           handleVolumeChange={handleVolumeChange}
@@ -178,8 +183,9 @@ const VideoDetail = (props: IProps) => {
           handleSeekToMouseUp={handleSeekToMouseUp}
           handleIsSeekingTo={handleIsSeekingTo}
           handleMute={handleMute}
-          handlePlay={handlePlay}
+          handlePlayPause={handlePlayPause}
           videoFigures={videoFigures}
+          duration={duration}
           playing={playingVideo.playing}
         />
       </VideoControlWrapper>

@@ -36,7 +36,7 @@ function App({ socket }: Props) {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage auth={auth} socket={socket} />} />
-        <Route path="/room/:roomID" element={<NewRoom socket={socket} />} />
+        <Route path="/room/:roomId" element={<NewRoom socket={socket} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

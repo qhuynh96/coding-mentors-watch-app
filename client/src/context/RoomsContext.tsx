@@ -4,8 +4,8 @@ import { FC, ReactNode, useState, useContext, createContext } from "react";
 export interface IVideo {
   url: string; // https
   playing: boolean; // true ? play : pause
-  playAt: number; // (milisecond) time the video played at
-  totalOffsetTime: number; // (milisecond) calculated when one of following events happen: pause or jump to an arbitrary point of time
+  latestUpdateAt: number; // (second) start, seekTo, play & pause
+  progress: number; // (second) video progress at latestUpdate
 }
 export interface RoomProps {
   roomId: string;

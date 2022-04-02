@@ -87,7 +87,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         var roomId = _a.roomId, userId = _a.userId;
         var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: userId });
         var roomInfo = res.roomInfo;
-        socket.join(res.roomInfo.roomId);
+        socket.join(roomId);
         // broadcast when a user connects
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
         // send back to participant

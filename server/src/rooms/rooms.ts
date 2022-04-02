@@ -5,9 +5,7 @@ export type VideoProps = {
   progress: number; // (second) video progress at latestUpdate
 };
 
-
-
-export interface Room {
+export interface IRoom {
   admin: string;
   roomId: string;
   members: string[];
@@ -15,28 +13,27 @@ export interface Room {
   videos: string[];
 }
 
-export interface RoomActs {
+export interface IRoomActs {
   userId: string;
   roomId: string;
 }
 
-const rooms: Array<Room> = [];
+const rooms = new Map<string, IRoom>();
 
 export const setVideoOnPlay = (playingVideo: VideoProps, roomId: string) => {
-  rooms.forEach(
-    (room: Room) => room.roomId === roomId && (room.onPlay = playingVideo)
-  );
+  const room = rooms.get(roomId) as IRoom;
+  room.onPlay = playingVideo;
   return { playingVideo, roomId };
 };
 
 export const getRooms = () => {
-  return rooms;
+  return rooms.values();
 };
 
-export const createRoom = (newRoom: Room) => {
+export const createRoom = (newRoom: IRoom) => {
   // check if the new room's ID does not already exist
-  if (!rooms.some((r) => r.roomId === newRoom.roomId)) {
-    rooms.push(newRoom);
+  if (!rooms.has(newRoom.roomId)) {
+    rooms.set(newRoom.roomId, newRoom);
   }
   /**
    * TODO: add error handling (case: the ID already exists)
@@ -46,21 +43,19 @@ export const createRoom = (newRoom: Room) => {
   return newRoom;
 };
 
-export const joinRoom = ({ userId, roomId }: RoomActs) => {
+export const joinRoom = ({ userId, roomId }: IRoomActs) => {
   /**
    * roomId: ID of the room the user wish to join
    * below, we check if a room with that ID exists
    * if yes, add the userId to the room's list of members (ie. the user joins the room)
    */
-  rooms.forEach((room) => {
-    if (room.roomId === roomId) {
-      room.members.push(userId);
-    }
-    // TODO: add error handling (case: roomId doesn't exist)
-  });
-  const roomInfo = rooms.filter((room) => room.roomId === roomId)[0];
+  const room = rooms.get(roomId) as IRoom;
+  if (!room.members.some((member) => member === userId)) {
+    room.members.push(userId);
+  }
+  const roomInfo = rooms.get(roomId);
 
   return { userId, roomInfo };
 };
 
-export const leaveRoom = ({ userId, roomId }: RoomActs) => {};
+export const leaveRoom = ({ userId, roomId }: IRoomActs) => {};

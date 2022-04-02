@@ -12,7 +12,7 @@ import {
   createRoom,
   getRooms,
   joinRoom,
-  RoomActs,
+  IRoomActs,
   leaveRoom,
   setVideoOnPlay,
   VideoProps,
@@ -60,17 +60,17 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     socket.emit(RoomEvent.CREATED_ROOM, { newRoom, userId });
   });
 
-  socket.on(RoomEvent.JOIN_ROOM, ({ roomId, userId }: RoomActs) => {
+  socket.on(RoomEvent.JOIN_ROOM, ({ roomId, userId }: IRoomActs) => {
     const res = joinRoom({ roomId, userId });
     const { roomInfo } = res;
-    socket.join(res.roomInfo.roomId);
+    socket.join(roomId);
     // broadcast when a user connects
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, { userId, roomInfo });
     // send back to participant
     socket.emit(RoomEvent.JOINED_ROOM, { userId, roomInfo });
   });
 
-  socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: RoomActs) => {
+  socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
     leaveRoom({ userId, roomId });
   });
   /**Video on play */

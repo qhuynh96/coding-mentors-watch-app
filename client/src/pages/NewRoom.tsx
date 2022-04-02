@@ -1,22 +1,21 @@
-import { FC, FormEvent, useState, useMemo } from "react";
+import {
+  FC,
+  FormEvent,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+} from "react";
 import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-import VideoDetail from "../components/videoDetail/VideoDetail";
+import VideoDetail from "../components/video-detail/VideoDetail";
 import VideoList from "../components/VideoList";
 import { IVideo, RoomProps } from "../context/RoomsContext";
-import { useEffect } from "react";
 import { RoomEvent } from "../RoomEvent";
 
 interface IProps {
   socket: Socket;
-}
-
-export interface IVideoUpdate {
-  url: string;
-  playing: boolean;
-  latestUpdateAt?: number;
-  progress: number;
 }
 
 interface ICustomState {
@@ -38,30 +37,28 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   );
   const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
 
-  const [search, setSearch] = useState<string>(
-    ""
-  );
+  const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
 
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
-  const updateVideo = (videoUpdate: IVideo) => {
+  const updateVideo = useCallback((videoUpdate: IVideo) => {
     setPlayingVideo(videoUpdate);
     socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
-  };
+  }, []);
 
   useEffect(() => {
-    socket.on(RoomEvent.VIDEO_UPDATED, ({updatedVideo}) => {
+    socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
       setPlayingVideo(updatedVideo);
     });
-    socket.on(RoomEvent.VIDEO_ONPLAY, ({playingVideo}) => {
+    socket.on(RoomEvent.VIDEO_ONPLAY, ({ playingVideo }) => {
       setPlayingVideo(playingVideo);
     });
   }, [socket]);
 
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
-  }, [userId]);
+  }, [userId,roomInfo.onPlay]);
 
   let searchId: string;
 

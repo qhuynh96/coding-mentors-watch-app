@@ -1,17 +1,12 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
 import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
-import VideoControl from "../videoControl/VideoControl";
-import screenful from "screenfull";
+import VideoControl from "../video_control/VideoControl";
+import { useVideoControl } from "../../hooks/useVideoControl";
+
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
@@ -20,26 +15,12 @@ interface IProps {
   updateVideo: (videoUpdate: IVideo) => void;
 }
 
-export interface IVideoFigures {
-  playing: boolean;
-  playedSeconds: number; //seconde
-  volume: number;
-  duration: number; //video duration (second)
-  isSeekingTo: boolean; //true && move to arbitrary point
-  muted: boolean;
-}
-type processTime = number; // second
-type changingState = {
-  played: number;
-  playedSeconds: number;
-  loaded: number;
-  loadedSeconds: number;
-};
+type ProcessTime = number; // second
 
-const initailFirgure = {
+const defaultFigures = {
   playing: true,
   playedSeconds: 0,
-  volume: 100,
+  volume: 90,
   duration: 0,
   isSeekingTo: false,
   muted: false,
@@ -47,11 +28,21 @@ const initailFirgure = {
 
 const VideoDetail = (props: IProps) => {
   const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
-  const [videoFigures, setVideoFigures] =
-    useState<IVideoFigures>(initailFirgure);
-  const [duration,setDuration] = useState<number>(0)
-  const playerRef = useRef<any>(null);
-  const videoContainerRef = useRef<any>()
+  const {
+    videoFigures,
+    videoContainerRef,
+    playerRef,
+    handleMute,
+    handleVolumeMouseUp,
+    handleVolumeChange,
+    handleIsSeekingTo,
+    handleSeekToChange,
+    handleSeekToMouseUp,
+    handlePlayPause,
+    handleProgress,
+    handleFullScreen,
+  } = useVideoControl(defaultFigures, playingVideo, updateVideo);
+  const [duration, setDuration] = useState<number>(0);
   /** latestTimeGetVideo : time users get latest update of movie from server */
   const latestTimeGetVideo = useMemo<number>(
     () => new Date().getTime() / 1000,
@@ -74,77 +65,21 @@ const VideoDetail = (props: IProps) => {
   //   ProgressTime =latestTimeGetVideo - latestVideoUpdateAt + Video progress at latestUpdate
   //                = t2 - t1 + t'1
 
-  const processTime: processTime =
+  const processTime: ProcessTime =
     latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
 
   /**Handle video events */
-  const handleMute = () => {
-    setVideoFigures({ ...videoFigures, muted: !videoFigures.muted });
-  };
-  const handleVolumeChange = (e: any, newValue: number) => {
-    setVideoFigures({
-      ...videoFigures,
-      volume: newValue / 100,
-      muted: newValue === 0 ? true : false,
-    });
-  };
-  const handleVolumeMouseUp = (e: any, newValue: number) => {
-    setVideoFigures({
-      ...videoFigures,
-      volume: newValue / 100,
-      muted: newValue === 0 ? true : false,
-    });
-  };
 
-  const handleIsSeekingTo = () => {
-    setVideoFigures({ ...videoFigures, isSeekingTo: true });
-  };
-
-  const handleSeekToChange = (e: any, newValue: number) => {
-    setVideoFigures({ ...videoFigures, playedSeconds: newValue });
-  };
-
-  const handleSeekToMouseUp = (e: any, newValue: number) => {
-    playerRef.current && playerRef.current.seekTo(newValue);
-    setVideoFigures({ ...videoFigures,playedSeconds: newValue, isSeekingTo: false });
-    const videoUpdate = {
-      ...playingVideo,
-      progress: newValue,
-      latestUpdateAt: (new Date().getTime() / 1000),
-    };
-    updateVideo(videoUpdate);
-  };
-
-  const handlePlayPause = () => {
-    const progress = playerRef.current!.getCurrentTime();
-    const videoUpdate = {
-      ...playingVideo,
-      progress: progress,
-      latestUpdateAt: (new Date().getTime() / 1000),
-      playing: !playingVideo.playing,
-    };
-    updateVideo(videoUpdate);
-  };
-
-  const handleProgress = useCallback((changingState: changingState) => {
-    if (!videoFigures.isSeekingTo) {
-      setVideoFigures({
-        ...videoFigures,
-        ...changingState,
-      });
-    }
-  },[videoFigures.playedSeconds]);
-
-  const handleFullScreen = () =>{
-    videoContainerRef.current && screenful.toggle(videoContainerRef.current)
-  }
-  const onReady = useCallback(() => {    
+  const onReady = useCallback(() => {
     socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
 
-  const onDuration= useCallback((duration: number)=>{
-    setDuration(duration)
-  },[playingVideo.url])
+  const onDuration = useCallback(
+    (duration: number) => {
+      setDuration(duration);
+    },
+    [playingVideo.url]
+  );
 
   useEffect(() => {
     playerRef.current && playerRef.current.seekTo(processTime);
@@ -164,16 +99,16 @@ const VideoDetail = (props: IProps) => {
         className="reactplayer"
         ref={playerRef}
         url={playingVideo.url}
-        controls={false}        
+        controls={false}
         playing={playingVideo.playing}
         onReady={onReady}
         onProgress={handleProgress}
         onDuration={onDuration}
         volume={videoFigures.volume}
         muted={videoFigures.muted}
-        style={{ pointerEvents: "none"}}
+        style={{ pointerEvents: "none" }}
       />
-      <VideoControlWrapper >
+      <VideoControlWrapper>
         <VideoControl
           handleFullScreen={handleFullScreen}
           isAdmin={isAdmin}

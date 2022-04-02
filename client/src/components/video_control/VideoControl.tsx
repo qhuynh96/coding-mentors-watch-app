@@ -7,25 +7,26 @@ import {
   VolumeOff,
   PauseCircle,
 } from "@mui/icons-material";
-import { IVideoFigures } from "../videoDetail/VideoDetail";
+import { IVideoFigures } from "../../hooks/useVideoControl";
 import { VideoProgressSlider, VolumeSilder } from "./styledComponents";
+
 interface IProps {
   isAdmin: boolean;
   videoFigures: IVideoFigures;
   duration: number;
+  playing: boolean;
   handlePlayPause: () => void;
   handleMute: () => void;
-  handleVolumeChange: (event: Event, newValue: any) => void;
+  handleVolumeChange: (event: Event, newValue: number | number[]) => void;
   handleVolumeMouseUp: (
     event: Event | React.SyntheticEvent<Element, Event>,
-    newValue: any
+    newValue: number | number[]
   ) => void;
-  playing: boolean;
   handleIsSeekingTo: () => void;
-  handleSeekToChange: (event: Event, newValue: any) => void;
+  handleSeekToChange: (event: Event, newValue: number | number[]) => void;
   handleSeekToMouseUp: (
     event: Event | React.SyntheticEvent<Element, Event>,
-    newValue: any
+    newValue: number | number[]
   ) => void;
   handleFullScreen: () => void;
 }
@@ -43,9 +44,10 @@ const VideoControl = (props: IProps) => {
     handleSeekToMouseUp,
     handleIsSeekingTo,
     handleFullScreen,
-    duration
+    duration,
   } = props;
   const { playedSeconds, muted, volume } = videoFigures;
+  console.log(muted,volume)
   return (
     <Grid container>
       {isAdmin && (
@@ -85,10 +87,9 @@ const VideoControl = (props: IProps) => {
           <VolumeSilder
             onChange={handleVolumeChange}
             onChangeCommitted={handleVolumeMouseUp}
-            value={volume * 100}
+            value={muted ? 0 : volume}
             min={0}
             max={100}
-            defaultValue={100}
           />
           <Typography sx={{ marginLeft: 2, color: "white" }}>00:00</Typography>
         </Grid>

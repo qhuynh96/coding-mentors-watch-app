@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 export const useStorage = (key: string, defaultValue: any) => {
   const [value, setValue] = useState(() => {

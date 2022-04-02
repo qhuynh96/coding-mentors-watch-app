@@ -19,7 +19,6 @@ interface RoomsContextInterface {
   rooms?: RoomProps[];
   getRooms?: (rooms: RoomProps[]) => void;
   addNewRoom?: (room: RoomProps) => void;
-  playVideo?: (onPlay: IVideo, roomId: string) => void;
 }
 
 export const RoomsContext = createContext<RoomsContextInterface>({});
@@ -34,15 +33,9 @@ export const RoomsContextProvider: FC<ReactNode> = ({ children }) => {
   const addNewRoom = useCallback((room: RoomProps)=> {
     setRooms([...rooms, room]);
   }, []);
-  const playVideo = useCallback((videoOnPlay: IVideo, roomId: string) => {
-    setRooms(
-      rooms.map((r: RoomProps) =>
-        r.roomId === roomId ? { ...r, onPlay: videoOnPlay } : r
-      )
-    );
-  }, []);
+  
   return (
-    <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom, playVideo }}>
+    <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom }}>
       {children}
     </RoomsContext.Provider>
   );

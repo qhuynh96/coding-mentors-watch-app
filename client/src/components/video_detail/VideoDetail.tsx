@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {useRef, useEffect, useState, useCallback, useMemo } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
 import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../video_control/VideoControl";
-import { useVideoControl } from "../../hooks/useVideoControl";
+import { useVideoControl } from "../video_control/useVideoControl";
 
 interface IProps {
   isAdmin: boolean;
@@ -28,10 +28,10 @@ const defaultFigures = {
 
 const VideoDetail = (props: IProps) => {
   const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
+  const playerRef = useRef<any>(null);
+  const videoContainerRef = useRef<any>(null);
   const {
     videoFigures,
-    videoContainerRef,
-    playerRef,
     handleMute,
     handleVolumeMouseUp,
     handleVolumeChange,
@@ -41,8 +41,8 @@ const VideoDetail = (props: IProps) => {
     handlePlayPause,
     handleProgress,
     handleFullScreen,
-  } = useVideoControl(defaultFigures, playingVideo, updateVideo);
-  const [duration, setDuration] = useState<number>(0);
+    handleDuration,
+  } = useVideoControl(defaultFigures, playingVideo, playerRef, videoContainerRef, updateVideo);
   /** latestTimeGetVideo : time users get latest update of movie from server */
   const latestTimeGetVideo = useMemo<number>(
     () => new Date().getTime() / 1000,
@@ -74,12 +74,6 @@ const VideoDetail = (props: IProps) => {
     socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
 
-  const onDuration = useCallback(
-    (duration: number) => {
-      setDuration(duration);
-    },
-    [playingVideo.url]
-  );
 
   useEffect(() => {
     playerRef.current && playerRef.current.seekTo(processTime);
@@ -103,7 +97,7 @@ const VideoDetail = (props: IProps) => {
         playing={playingVideo.playing}
         onReady={onReady}
         onProgress={handleProgress}
-        onDuration={onDuration}
+        onDuration={handleDuration}
         volume={videoFigures.volume}
         muted={videoFigures.muted}
         style={{ pointerEvents: "none" }}
@@ -120,7 +114,6 @@ const VideoDetail = (props: IProps) => {
           handleMute={handleMute}
           handlePlayPause={handlePlayPause}
           videoFigures={videoFigures}
-          duration={duration}
           playing={playingVideo.playing}
         />
       </VideoControlWrapper>

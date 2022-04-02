@@ -7,13 +7,12 @@ import {
   VolumeOff,
   PauseCircle,
 } from "@mui/icons-material";
-import { IVideoFigures } from "../../hooks/useVideoControl";
+import { IVideoFigures } from "./useVideoControl";
 import { VideoProgressSlider, VolumeSilder } from "./styledComponents";
 
 interface IProps {
   isAdmin: boolean;
   videoFigures: IVideoFigures;
-  duration: number;
   playing: boolean;
   handlePlayPause: () => void;
   handleMute: () => void;
@@ -35,19 +34,17 @@ const VideoControl = (props: IProps) => {
   const {
     isAdmin,
     videoFigures,
+    playing,
     handlePlayPause,
     handleMute,
     handleVolumeChange,
     handleVolumeMouseUp,
-    playing,
     handleSeekToChange,
     handleSeekToMouseUp,
     handleIsSeekingTo,
     handleFullScreen,
-    duration,
   } = props;
-  const { playedSeconds, muted, volume } = videoFigures;
-  console.log(muted,volume)
+  const { playedSeconds, muted, volume, duration } = videoFigures;
   return (
     <Grid container>
       {isAdmin && (

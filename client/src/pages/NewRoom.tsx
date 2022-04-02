@@ -9,7 +9,7 @@ import {
 import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-import VideoDetail from "../components/video-detail/VideoDetail";
+import VideoDetail from "../components/video_detail/VideoDetail";
 import VideoList from "../components/VideoList";
 import { IVideo, RoomProps } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";

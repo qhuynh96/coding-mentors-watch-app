@@ -1,5 +1,5 @@
 import { useCallback, useState, useRef } from "react";
-import { IVideo } from "../context/RoomsContext";
+import { IVideo } from "../../context/RoomsContext";
 import screenful from "screenfull";
 
 export interface IVideoFigures {
@@ -23,12 +23,12 @@ type ChangingState = {
 export const useVideoControl = (
   defaultFigures: IVideoFigures,
   playingVideo: IVideo,
+  playerRef: any,
+  videoContainerRef: any,
   updateVideo: UpdateVideo
 ) => {
-  const [videoFigures, setVideoFigures] = useState<IVideoFigures>(defaultFigures);
-  const playerRef = useRef<any>(null);
-  const videoContainerRef = useRef<any>();
-
+  const [videoFigures, setVideoFigures] =
+    useState<IVideoFigures>(defaultFigures);
   const handleMute = useCallback(() => {
     setVideoFigures((prev) => ({
       ...prev,
@@ -40,7 +40,7 @@ export const useVideoControl = (
     (e: Event, newValue: number | number[]) => {
       setVideoFigures((prev) => ({
         ...prev,
-        volume: prev.muted ? 0 : (newValue as number) ,
+        volume: prev.muted ? 0 : (newValue as number),
         muted: newValue === 0 ? true : false,
       }));
     },
@@ -54,7 +54,7 @@ export const useVideoControl = (
     ) => {
       setVideoFigures((prev) => ({
         ...prev,
-        volume: prev.muted ? 0 : (newValue as number) ,
+        volume: prev.muted ? 0 : (newValue as number),
         muted: newValue === 0 ? true : false,
       }));
     },
@@ -62,12 +62,15 @@ export const useVideoControl = (
   );
 
   const handleIsSeekingTo = useCallback(() => {
-    setVideoFigures({ ...videoFigures, isSeekingTo: true });
+    setVideoFigures((prev) => ({ ...prev, isSeekingTo: true }));
   }, [setVideoFigures]);
 
   const handleSeekToChange = useCallback(
     (e: Event, newValue: number | number[]) => {
-      setVideoFigures({ ...videoFigures, playedSeconds: newValue as number });
+      setVideoFigures((prev) => ({
+        ...prev,
+        playedSeconds: newValue as number,
+      }));
     },
     [setVideoFigures]
   );
@@ -78,11 +81,11 @@ export const useVideoControl = (
       newValue: number | number[]
     ) => {
       playerRef.current && playerRef.current.seekTo(newValue as number);
-      setVideoFigures({
-        ...videoFigures,
+      setVideoFigures((prev) => ({
+        ...prev,
         playedSeconds: newValue as number,
         isSeekingTo: false,
-      });
+      }));
       const videoUpdate = {
         ...playingVideo,
         progress: newValue as number,
@@ -107,11 +110,21 @@ export const useVideoControl = (
   const handleProgress = useCallback(
     (changingState: ChangingState) => {
       if (!videoFigures.isSeekingTo) {
-        setVideoFigures({
-          ...videoFigures,
+        setVideoFigures((prev) => ({
+          ...prev,
           ...changingState,
-        });
+        }));
       }
+    },
+    [setVideoFigures]
+  );
+
+  const handleDuration = useCallback(
+    (duration) => {
+      setVideoFigures((prev) => ({
+        ...prev,
+        duration,
+      }));
     },
     [setVideoFigures]
   );
@@ -132,5 +145,6 @@ export const useVideoControl = (
     handlePlayPause,
     handleProgress,
     handleFullScreen,
+    handleDuration,
   };
 };

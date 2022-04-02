@@ -1,13 +1,13 @@
 import React from "react";
 
 interface IProps {
-  video: string[];
+  videos: string[];
 }
 
-const VideoList = ({ video }: IProps) => {
+const VideoList = ({ videos }: IProps) => {
   return (
     <div className="column" style={{ border: "1px solid black" }}>
-      {video.map((item) => (
+      {videos.map((item) => (
         <div className="video-item item " key={item}>
           {item}
         </div>

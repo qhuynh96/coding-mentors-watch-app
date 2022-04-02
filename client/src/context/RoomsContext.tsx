@@ -1,9 +1,18 @@
+import { useCallback } from "react";
 import { FC, ReactNode, useState, useContext, createContext } from "react";
 
+export interface IVideo {
+  url: string; // https
+  playing: boolean; // true ? play : pause
+  latestUpdateAt: number; // (second) start, seekTo, play & pause
+  progress: number; // (second) video progress at latestUpdate
+}
 export interface RoomProps {
   roomId: string;
   admin: string;
   members: string[];
+  onPlay: IVideo;
+  videos: string[];
 }
 
 interface RoomsContextInterface {
@@ -14,19 +23,17 @@ interface RoomsContextInterface {
 
 export const RoomsContext = createContext<RoomsContextInterface>({});
 
-export const RoomsContextProvider: FC<ReactNode> = ({
-  children,
-}) => {
+export const RoomsContextProvider: FC<ReactNode> = ({ children }) => {
   const [rooms, setRooms] = useState<RoomProps[]>([]);
 
-  const getRooms = (rooms: RoomProps[]): void => {
+  const getRooms = useCallback((rooms: RoomProps[]) => {
     setRooms(rooms);
-  };
+  }, []);
 
-  const addNewRoom = (room: RoomProps): void => {
+  const addNewRoom = useCallback((room: RoomProps)=> {
     setRooms([...rooms, room]);
-  };
-
+  }, []);
+  
   return (
     <RoomsContext.Provider value={{ rooms, getRooms, addNewRoom }}>
       {children}

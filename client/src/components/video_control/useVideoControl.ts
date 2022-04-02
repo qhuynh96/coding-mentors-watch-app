@@ -1,6 +1,7 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState } from "react";
 import { IVideo } from "../../context/RoomsContext";
 import screenful from "screenfull";
+import ReactPlayer from "react-player";
 
 export interface IVideoFigures {
   playing: boolean;
@@ -23,8 +24,8 @@ type ChangingState = {
 export const useVideoControl = (
   defaultFigures: IVideoFigures,
   playingVideo: IVideo,
-  playerRef: any,
-  videoContainerRef: any,
+  playerRef: React.RefObject<ReactPlayer>,
+  videoContainerRef: React.RefObject<HTMLDivElement>,
   updateVideo: UpdateVideo
 ) => {
   const [videoFigures, setVideoFigures] =
@@ -80,7 +81,7 @@ export const useVideoControl = (
       e: Event | React.SyntheticEvent<Element, Event>,
       newValue: number | number[]
     ) => {
-      playerRef.current && playerRef.current.seekTo(newValue as number);
+      playerRef.current && playerRef.current?.seekTo(newValue as number);
       setVideoFigures((prev) => ({
         ...prev,
         playedSeconds: newValue as number,
@@ -134,8 +135,6 @@ export const useVideoControl = (
   }, []);
   return {
     videoFigures,
-    playerRef,
-    videoContainerRef,
     handleMute,
     handleVolumeChange,
     handleVolumeMouseUp,

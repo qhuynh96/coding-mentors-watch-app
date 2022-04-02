@@ -1,4 +1,4 @@
-import React, {useRef, useEffect, useState, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
@@ -28,8 +28,8 @@ const defaultFigures = {
 
 const VideoDetail = (props: IProps) => {
   const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
-  const playerRef = useRef<any>(null);
-  const videoContainerRef = useRef<any>(null);
+  const playerRef = useRef<ReactPlayer>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const {
     videoFigures,
     handleMute,
@@ -42,7 +42,13 @@ const VideoDetail = (props: IProps) => {
     handleProgress,
     handleFullScreen,
     handleDuration,
-  } = useVideoControl(defaultFigures, playingVideo, playerRef, videoContainerRef, updateVideo);
+  } = useVideoControl(
+    defaultFigures,
+    playingVideo,
+    playerRef,
+    videoContainerRef,
+    updateVideo
+  );
   /** latestTimeGetVideo : time users get latest update of movie from server */
   const latestTimeGetVideo = useMemo<number>(
     () => new Date().getTime() / 1000,
@@ -65,19 +71,15 @@ const VideoDetail = (props: IProps) => {
   //   ProgressTime =latestTimeGetVideo - latestVideoUpdateAt + Video progress at latestUpdate
   //                = t2 - t1 + t'1
 
-  const processTime: ProcessTime =
-    latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
-
-  /**Handle video events */
+  useEffect(() => {
+    const processTime: ProcessTime =
+      latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
+    playerRef.current && playerRef.current.seekTo(processTime);
+  }, [playingVideo]);
 
   const onReady = useCallback(() => {
     socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
   }, [playingVideo.url]);
-
-
-  useEffect(() => {
-    playerRef.current && playerRef.current.seekTo(processTime);
-  }, [playingVideo]);
 
   if (!playingVideo.url) {
     return (

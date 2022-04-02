@@ -6,11 +6,15 @@ interface IProps {
 }
 
 const VideoList = ({ video }: IProps) => {
+  function getYoutubeThumbnailUrl(videoId: string) {
+    return `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
+  }
+
   return (
     <div className="video-list" style={{ border: "1px solid black" }}>
       {video.map((item) => (
         <div className="video-item" key={item}>
-          <img src={`https://img.youtube.com/vi/${item}/sddefault.jpg`} alt="" /> 
+          <img src={getYoutubeThumbnailUrl(item)} alt="" /> 
         </div>
       ))}
     </div>

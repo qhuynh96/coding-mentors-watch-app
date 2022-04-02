@@ -63,25 +63,20 @@ const NewRoom: FC<Props> = ({ socket }) => {
           </div>
         </div>
         <div className="ui row ">
-
           <div className="ten wide column">
             <div className="ui row">
               <h1>Upcoming videos</h1>
             </div>
-            <div className="ui row"><VideoList video={video} /></div>
-           
-
+            <div className="ui row">
+              <VideoList video={video} />
+            </div>
           </div>
-
-      
-
           <div
             className="four wide column"
             style={{ border: "1px solid black" }}
           >
             <h3>Chat box (room {roomID})</h3>
           </div>
-
         </div>
       </div>
     </div>

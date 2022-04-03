@@ -22,6 +22,7 @@
     "@types/cookie-parser": "^1.4.2",
     "@types/http-errors": "^1.8.2",
     "@types/morgan": "^1.9.3",
+    "@types/uuid": "^8.3.4",
     "nodemon": "^2.0.15"
   }
 }

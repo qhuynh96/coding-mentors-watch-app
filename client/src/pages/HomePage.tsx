@@ -5,42 +5,40 @@ import { useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
 import { RoomEvent } from "../RoomEvent";
 import { RoomsContext } from "../context/RoomsContext";
-
 type Props = {
   socket: Socket;
+  auth: string | null;
 };
 
-function HomePage({ socket }: Props) {
+function HomePage({ socket, auth }: Props) {
   const navigate = useNavigate();
-
-  const [userId, setUserId] = useState<string | null>(null);
   const [inputRoomID, setInputRoomID] = useState<string>("");
-
   const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
 
-  const createRoom = useCallback((): void => {
-    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4() });
-  }, [socket]);
+  const createRoom = useCallback(() => {
+    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId: auth });
+  }, [socket,auth]);
 
   const joinRoom = useCallback(() => {
-    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID });
-  }, [inputRoomID, socket]);
+    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID, userId: auth });
+  }, [inputRoomID, socket,auth]);
 
   useEffect(() => {
-    socket.on(RoomEvent.SERVER_ROOMS, ({ rooms, userId }) => {
-      setUserId(userId);
-      getRooms && getRooms(rooms);
-    });
-
-    socket.on(RoomEvent.CREATED_ROOM, (newRoom) => {
+    socket.on(RoomEvent.CREATED_ROOM, ({ userId, newRoom }) => {
       addNewRoom && addNewRoom(newRoom);
-      navigate(`/room/${newRoom.roomId}`);
+
+      auth === userId &&
+        navigate(`/room/${newRoom.roomId}`, {
+          state: { userId, roomInfo: newRoom },
+        });
     });
 
-    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomId }) => {
-      navigate(`/room/${roomId}`);
+    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomInfo }) => {
+      // TODOs: add roomInfo into context for homepage display
+      auth === userId &&
+        navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
     });
-  }, [addNewRoom, getRooms, navigate, socket]);
+  }, [addNewRoom, getRooms, socket, navigate,auth]);
 
   return (
     <div

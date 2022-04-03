@@ -2,7 +2,7 @@ import React from "react";
 import "./videoList.css"
 
 interface IProps {
-  video: string[];
+  videos: string[];
 }
 
 const VideoList = ({ video }: IProps) => {
@@ -15,6 +15,7 @@ const VideoList = ({ video }: IProps) => {
       {video.map((item) => (
         <div className="video-item" key={item}>
           <img src={getYoutubeThumbnailUrl(item)} alt="" /> 
+
         </div>
       ))}
     </div>

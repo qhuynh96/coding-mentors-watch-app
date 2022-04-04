@@ -50,6 +50,7 @@ var RoomEvent_1 = require("./RoomEvent");
 var uuid_1 = require("uuid");
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
+var roomsRoute_1 = __importDefault(require("./routes/roomsRoute"));
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: "*",
@@ -86,7 +87,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: userId });
-        var roomInfo = res.roomInfo;
+        var roomInfo = res;
         socket.join(roomId);
         // broadcast when a user connects
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
@@ -108,7 +109,9 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         var videoUpdate = _a.videoUpdate, roomId = _a.roomId;
         var res = (0, rooms_1.setVideoOnPlay)(videoUpdate, roomId);
         //broadcast video to roomID except sender
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+        socket.broadcast
+            .to(roomId)
+            .emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
     });
 });
 app.use((0, morgan_1.default)("dev"));
@@ -116,22 +119,18 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
+app.use("/watch-app/rooms", roomsRoute_1.default);
 app.get("/watch-app/user", (function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var userId, err_1;
+    var userId;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, uuid_1.v4)()];
-            case 1:
-                userId = _a.sent();
-                res.status(200).json(userId);
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                throw err_1;
-            case 3: return [2 /*return*/];
+        try {
+            userId = (0, uuid_1.v4)();
+            res.status(200).json(userId);
         }
+        catch (err) {
+            throw err;
+        }
+        return [2 /*return*/];
     });
 }); }));
 app.get("/watch-app", (function (req, res) {

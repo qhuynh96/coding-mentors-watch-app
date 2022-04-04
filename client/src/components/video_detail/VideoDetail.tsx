@@ -49,11 +49,8 @@ const VideoDetail = (props: IProps) => {
     videoContainerRef,
     updateVideo
   );
-  /** latestTimeGetVideo : time users get latest update of movie from server */
-  const latestTimeGetVideo = useMemo<number>(
-    () => new Date().getTime() / 1000,
-    [playingVideo]
-  );
+  
+  
   // ProgressTime is the time in second that the video has been progressed.
   // It is calculated from the formula:
   //
@@ -72,6 +69,9 @@ const VideoDetail = (props: IProps) => {
   //                = t2 - t1 + t'1
 
   useEffect(() => {
+    /** latestTimeGetVideo : time users get latest update of movie from server */
+    const latestTimeGetVideo= new Date().getTime() / 1000      
+   
     const processTime: ProcessTime =
       latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
     playerRef.current && playerRef.current.seekTo(processTime);

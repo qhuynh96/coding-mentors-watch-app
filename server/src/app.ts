@@ -15,8 +15,10 @@ import {
   IRoomActs,
   leaveRoom,
   setVideoOnPlay,
-  VideoProps,
+  IVideo,
 } from "./rooms/rooms";
+
+import roomRoute from "./routes/roomsRoute";
 
 const app = express();
 
@@ -47,10 +49,9 @@ io.on(RoomEvent.connection, (socket: Socket) => {
       admin: userId,
       members: [userId],
       roomId,
-      onPlay: {} as VideoProps,
+      onPlay: {} as IVideo,
       videos: [] as string[],
     });
-
     // join the new room
     socket.join(roomId);
     //welcome to the room
@@ -64,7 +65,7 @@ io.on(RoomEvent.connection, (socket: Socket) => {
 
   socket.on(RoomEvent.JOIN_ROOM, ({ roomId, userId }: IRoomActs) => {
     const res = joinRoom({ roomId, userId });
-    const { roomInfo } = res;
+    const roomInfo = res;
     socket.join(roomId);
     //welcome to the room
     const msg = { sender: "server", text: `Welcome to Watch-app room` };
@@ -104,6 +105,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/watch-app/rooms", roomRoute);
 app.get("/watch-app/user", (async (req, res) => {
   try {
     const userId = uuidv4();

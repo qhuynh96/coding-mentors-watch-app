@@ -50,6 +50,7 @@ var RoomEvent_1 = require("./RoomEvent");
 var uuid_1 = require("uuid");
 var http_1 = require("http");
 var rooms_1 = require("./rooms/rooms");
+var roomsRoute_1 = __importDefault(require("./routes/roomsRoute"));
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: "*",
@@ -89,7 +90,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: userId });
-        var roomInfo = res.roomInfo;
+        var roomInfo = res;
         socket.join(roomId);
         //welcome to the room
         var msg = { sender: "server", text: "Welcome to Watch-app room" };
@@ -129,6 +130,7 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.static(path_1.default.join(__dirname, "public")));
+app.use("/watch-app/rooms", roomsRoute_1.default);
 app.get("/watch-app/user", (function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var userId;
     return __generator(this, function (_a) {

@@ -115,15 +115,11 @@ const NewRoom: FC<IProps> = ({ socket }) => {
         </div>
         <div className="ui row ">
           <div className="ten wide column">
-            <div className="column">
-              <h1>Upcoming videos: </h1>
+            <div className="ui row">
+              <h1>Upcoming videos</h1>
             </div>
-          </div>
-          <div className="ten wide column">
-            <div className="ui grid column">
-              <div className="five column row">
-                <VideoList videos={videos} />
-              </div>
+            <div className="ui row">
+              <VideoList video={video} />
             </div>
           </div>
           <div

@@ -14,7 +14,7 @@ import {
 const router = Router();
 
 //Create room
-router.post("/", ((req, res) => {
+router.post("/", (async (req, res) => {
   const userId = req.body.userId;
   const newRoom = {
     admin: userId,
@@ -77,7 +77,7 @@ router.put("/leave/:roomId", ((req, res) => {
   }
 }) as RequestHandler);
 
-//update Video onPlay
+//update Video
 router.put("/:roomId/playingVideo", ((req, res) => {
   const roomId = req.params.roomId;
   const { url, playing, latestUpdateAt, progress } = req.body;

@@ -47,7 +47,8 @@ export const addVideo = (url: string, roomId: string) => {
 
 export const getRooms = () => {
   if (rooms) {
-    return rooms.values();
+    const data = Array.from(rooms.values());
+    return data;
   } else {
     return createError(404);
   }
@@ -79,7 +80,6 @@ export const joinRoom = ({ userId, roomId }: IRoomActs) => {
       room.members.push(userId);
     }
     const roomInfo = rooms.get(roomId);
-
     return roomInfo;
   } else {
     return createError(404);

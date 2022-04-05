@@ -33,7 +33,8 @@ var addVideo = function (url, roomId) {
 exports.addVideo = addVideo;
 var getRooms = function () {
     if (rooms) {
-        return rooms.values();
+        var data = Array.from(rooms.values());
+        return data;
     }
     else {
         return (0, http_errors_1.default)(404);

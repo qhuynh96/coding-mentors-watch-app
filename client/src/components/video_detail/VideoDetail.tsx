@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
@@ -50,8 +50,7 @@ const VideoDetail = (props: IProps) => {
     videoContainerRef,
     updateVideo
   );
-  
-  
+
   // ProgressTime is the time in second that the video has been progressed.
   // It is calculated from the formula:
   //
@@ -71,8 +70,8 @@ const VideoDetail = (props: IProps) => {
 
   useEffect(() => {
     /** latestTimeGetVideo : time users get latest update of movie from server */
-    const latestTimeGetVideo= new Date().getTime() / 1000      
-   
+    const latestTimeGetVideo = new Date().getTime() / 1000;
+
     const processTime: ProcessTime =
       latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
     playerRef.current && playerRef.current.seekTo(processTime);
@@ -80,7 +79,7 @@ const VideoDetail = (props: IProps) => {
 
   const onReady = useCallback(() => {
     socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
-  }, [playingVideo.url]);
+  }, [playingVideo, socket, roomId]);
 
   if (!playingVideo.url) {
     return (

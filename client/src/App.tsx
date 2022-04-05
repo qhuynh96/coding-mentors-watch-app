@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { RoomsContext } from "./context/RoomsContext";
-import { RoomEvent } from "./RoomEvent";
 import { Socket } from "socket.io-client";
 import HomePage from "./pages/HomePage";
 import NewRoom from "./pages/NewRoom";
@@ -17,20 +16,19 @@ function App({ socket }: Props) {
   //store in browser
   const [auth, setAuth] = useStorage("userId", null);
   const { getRooms } = useContext(RoomsContext);
-
   useEffect(() => {
     const getUserId = async () => {
       const { data } = await serverAxios.get("/watch-app/user");
       setAuth(data);
     };
-    getUserId();
-  }, [setAuth]);
 
-  useEffect(() => {
-    socket.on(RoomEvent.SERVER_ROOMS, ({ rooms }) => {
-      getRooms && getRooms(rooms);
-    });
-  }, [getRooms, socket]);
+    const fetchRooms = async () => {
+      const res = await serverAxios.get("/watch-app/rooms/");
+      getRooms && getRooms(res.data);
+    };
+    fetchRooms();
+    getUserId();
+  }, [getRooms, setAuth]);
 
   return (
     <BrowserRouter>

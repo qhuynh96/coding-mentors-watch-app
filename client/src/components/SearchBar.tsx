@@ -1,5 +1,5 @@
 import React, { FormEvent } from "react";
-import { StandardTextFieldProps, TextField } from "@mui/material";
+import { Button, StandardTextFieldProps, TextField } from "@mui/material";
 
 interface IProps extends StandardTextFieldProps {
   value: string;
@@ -8,20 +8,36 @@ interface IProps extends StandardTextFieldProps {
 }
 const SearchBar = ({ value, handleChange, handleSubmit, ...rest }: IProps) => {
   return (
-    <form className="ten wide column" onSubmit={handleSubmit}>
-      <div className="ui two column grid">
+    <form className="twelve wide column" onSubmit={handleSubmit}>
+      <div
+        className="ui two column grid"
+        style={{ alignItems: "center", justifyContent: "center" }}
+      >
         <div className="fourteen wide column">
           <TextField
             {...rest}
+            sx={{
+              input: {
+                padding: "10px",
+              },
+            }}
             type="search"
             value={value}
-            variant="outlined"
+            variant="filled"
             onChange={(e) => handleChange(e.target.value)}
             placeholder="Youtube URL input"
           />
         </div>
         <div className="two wide column">
-          <button className="ui primary fluid button">Submit</button>
+          <Button
+            sx={{
+              width: "100px",
+              color: "black",
+              backgroundColor: "lightgray",
+            }}
+          >
+            Submit
+          </Button>
         </div>
       </div>
     </form>

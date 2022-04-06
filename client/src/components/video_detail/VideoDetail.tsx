@@ -6,6 +6,7 @@ import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../video_control/VideoControl";
 import { useVideoControl } from "../video_control/useVideoControl";
+import videoImg from "./videoImg.jpg";
 
 interface IProps {
   isAdmin: boolean;
@@ -83,9 +84,16 @@ const VideoDetail = (props: IProps) => {
 
   if (!playingVideo.url) {
     return (
-      <div className="ui embed ">
-        <p>...loading</p>
-      </div>
+      <div
+        className="ui embed "
+        style={{
+          height: "100%",
+          backgroundImage: `url(${videoImg})`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      ></div>
     );
   }
 

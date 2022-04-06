@@ -10,9 +10,12 @@ import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import VideoDetail from "../components/video_detail/VideoDetail";
-import VideoList from "../components/VideoList";
+import VideoList from "../components/video_list/VideoList";
 import { IVideo, RoomProps } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";
+import { Avatar, AvatarGroup, Button } from "@mui/material";
+import ChatBox from "../components/chat_box/ChatBox";
+import { useNavigate } from "react-router-dom";
 
 interface IProps {
   socket: Socket;
@@ -26,7 +29,7 @@ interface ICustomState {
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
 
 const NewRoom: FC<IProps> = ({ socket }) => {
-  // TODO: define other socket events (for watching Youtube together/chatting)
+  const navigate = useNavigate();
   const { roomId } = useParams();
   const location = useLocation();
   const state = location.state as ICustomState;
@@ -47,6 +50,10 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
   }, []);
 
+  const leaveRoom = useCallback(() => {
+    navigate("/");
+  }, []);
+
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
       setPlayingVideo(updatedVideo);
@@ -58,7 +65,7 @@ const NewRoom: FC<IProps> = ({ socket }) => {
 
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
-  }, [userId,roomInfo.onPlay]);
+  }, [userId, roomInfo.onPlay]);
 
   let searchId: string;
 
@@ -85,19 +92,45 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   return (
     <div className="ui segment">
       <div className="ui grid">
-        <div className="ui row">
+        <div
+          className="ui row"
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
           <SearchBar
             handleChange={setSearch}
-            className="ui fluid input"
+            className="ui fluid input "
             handleSubmit={handleSubmit}
             value={search}
           />
-          <div className="six wide column">
-            <button className="ui  fluid  button">Menu</button>
+          <div className="four wide column">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <AvatarGroup max={2}>
+                <Avatar>{isAdmin ? "A" : "C"}</Avatar>
+                <Avatar />
+                <Avatar />
+                <Avatar />
+              </AvatarGroup>
+              <Button
+                onClick={leaveRoom}
+                sx={{
+                  width: "100px",
+                  color: "black",
+                  backgroundColor: "lightgray",
+                }}
+              >
+                Leave
+              </Button>
+            </div>
           </div>
         </div>
         <div className="ui row">
-          <form className="ten wide column">
+          <form className="twelve wide column">
             <VideoDetail
               roomId={roomInfo.roomId}
               socket={socket}
@@ -106,27 +139,13 @@ const NewRoom: FC<IProps> = ({ socket }) => {
               updateVideo={updateVideo}
             />
           </form>
-          <div
-            className="four wide column"
-            style={{ border: "1px solid black" }}
-          >
-            <h3>isAdmin: {JSON.stringify(isAdmin)}</h3>
+          <div className="four wide column">
+            <ChatBox />
           </div>
         </div>
-        <div className="ui row ">
-          <div className="ten wide column">
-            <div className="ui row">
-              <h1>Upcoming videos</h1>
-            </div>
-            <div className="ui row">
-              <VideoList video={video} />
-            </div>
-          </div>
-          <div
-            className="four wide column"
-            style={{ border: "1px solid black" }}
-          >
-            <h3>Chat box (room {roomId})</h3>
+        <div className="ui row">
+          <div className="sixteen wide column">
+            <VideoList videos={videos} />
           </div>
         </div>
       </div>

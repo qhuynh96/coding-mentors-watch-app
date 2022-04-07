@@ -8,7 +8,7 @@ import {
   IVideo,
   joinRoom,
   leaveRoom,
-  setVideoOnPlay,
+  updateVideoOnPlay,
 } from "../rooms/rooms";
 
 const router = Router();
@@ -17,9 +17,10 @@ const router = Router();
 router.post("/", (async (req, res) => {
   const userId = req.body.userId;
   const newRoom = {
+    roomId: uuidv4(),
+
     admin: userId,
     members: [userId],
-    roomId: uuidv4(),
     onPlay: {} as IVideo,
     videos: [] as string[],
   };
@@ -50,7 +51,6 @@ router.get("/:roomId", ((req, res) => {
     const room = findRoom(roomId);
     res.status(200).json(room);
   } catch (err) {
-    console.log(err);
     res.status(500).json(err);
   }
 }) as RequestHandler);
@@ -78,13 +78,13 @@ router.put("/leave/:roomId", ((req, res) => {
 }) as RequestHandler);
 
 //update Video
-router.put("/:roomId/playingVideo", ((req, res) => {
+router.put("/onPlay/:roomId", (async (req, res) => {
   const roomId = req.params.roomId;
   const { url, playing, latestUpdateAt, progress } = req.body;
   const playingVideo = { url, playing, latestUpdateAt, progress };
   try {
-    const room = setVideoOnPlay(playingVideo, roomId);
-    res.status(200).json(room);
+    const room = await updateVideoOnPlay(playingVideo, roomId);
+    res.status(200).json(room.onPlay);
   } catch (err) {
     res.status(500).json(err);
   }

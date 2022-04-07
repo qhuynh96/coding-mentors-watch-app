@@ -8,11 +8,11 @@ export interface IVideo {
   progress: number; // (second) video progress at latestUpdate
 }
 export interface RoomProps {
-  roomId: string;
-  admin: string;
-  members: string[];
-  onPlay: IVideo;
-  videos: string[];
+  roomId?: string;
+  admin?: string;
+  members?: string[];
+  onPlay?: IVideo;
+  videos?: string[];
 }
 
 interface RoomsContextInterface {

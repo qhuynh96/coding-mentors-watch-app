@@ -70,18 +70,17 @@ const VideoDetail = (props: IProps) => {
 
   useEffect(() => {
     /** latestTimeGetVideo : time users get latest update of movie from server */
-    const latestTimeGetVideo = new Date().getTime() / 1000;
+    if (playingVideo) {
+      const latestTimeGetVideo = new Date().getTime() / 1000;
+      const processTime: ProcessTime =
+        latestTimeGetVideo -
+        playingVideo.latestUpdateAt +
+        playingVideo.progress;
+      playerRef.current && playerRef.current.seekTo(processTime, "seconds");
+    }
+  }, [playingVideo?.latestUpdateAt, playerRef]);
 
-    const processTime: ProcessTime =
-      latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
-    playerRef.current && playerRef.current.seekTo(processTime);
-  }, [playingVideo]);
-
-  const onReady = useCallback(() => {
-    socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
-  }, [playingVideo, socket, roomId]);
-
-  if (!playingVideo.url) {
+  if (!playingVideo?.url) {
     return (
       <div
         className="ui embed "
@@ -104,7 +103,6 @@ const VideoDetail = (props: IProps) => {
         url={playingVideo.url}
         controls={false}
         playing={playingVideo.playing}
-        onReady={onReady}
         onProgress={handleProgress}
         onDuration={handleDuration}
         volume={videoFigures.volume}

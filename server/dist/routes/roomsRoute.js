@@ -46,9 +46,9 @@ router.post("/", (function (req, res) { return __awaiter(void 0, void 0, void 0,
     return __generator(this, function (_a) {
         userId = req.body.userId;
         newRoom = {
+            roomId: (0, uuid_1.v4)(),
             admin: userId,
             members: [userId],
-            roomId: (0, uuid_1.v4)(),
             onPlay: {},
             videos: [],
         };
@@ -82,7 +82,6 @@ router.get("/:roomId", (function (req, res) {
         res.status(200).json(room);
     }
     catch (err) {
-        console.log(err);
         res.status(500).json(err);
     }
 }));
@@ -109,18 +108,30 @@ router.put("/leave/:roomId", (function (req, res) {
     }
 }));
 //update Video
-router.put("/:roomId/playingVideo", (function (req, res) {
-    var roomId = req.params.roomId;
-    var _a = req.body, url = _a.url, playing = _a.playing, latestUpdateAt = _a.latestUpdateAt, progress = _a.progress;
-    var playingVideo = { url: url, playing: playing, latestUpdateAt: latestUpdateAt, progress: progress };
-    try {
-        var room = (0, rooms_1.setVideoOnPlay)(playingVideo, roomId);
-        res.status(200).json(room);
-    }
-    catch (err) {
-        res.status(500).json(err);
-    }
-}));
+router.put("/onPlay/:roomId", (function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var roomId, _a, url, playing, latestUpdateAt, progress, playingVideo, room, err_1;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                roomId = req.params.roomId;
+                _a = req.body, url = _a.url, playing = _a.playing, latestUpdateAt = _a.latestUpdateAt, progress = _a.progress;
+                playingVideo = { url: url, playing: playing, latestUpdateAt: latestUpdateAt, progress: progress };
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, (0, rooms_1.updateVideoOnPlay)(playingVideo, roomId)];
+            case 2:
+                room = _b.sent();
+                res.status(200).json(room.onPlay);
+                return [3 /*break*/, 4];
+            case 3:
+                err_1 = _b.sent();
+                res.status(500).json(err_1);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); }));
 //add video
 router.post("/:roomId/videos", (function (req, res) {
     var roomId = req.params.roomId;

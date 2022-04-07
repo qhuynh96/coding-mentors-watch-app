@@ -16,6 +16,7 @@ function App({ socket }: Props) {
   //store in browser
   const [auth, setAuth] = useStorage("userId", null);
   const { getRooms } = useContext(RoomsContext);
+
   useEffect(() => {
     const getUserId = async () => {
       const { data } = await serverAxios.get("/watch-app/user");

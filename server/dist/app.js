@@ -66,7 +66,6 @@ var io = new socket_io_1.Server(server, {
 // run once the client connects
 io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     var rooms = (0, rooms_1.getRooms)();
-    socket.emit(RoomEvent_1.RoomEvent.SERVER_ROOMS, { rooms: rooms });
     socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
         var newRoom = _a.newRoom;
         // join the new room
@@ -86,18 +85,8 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     //**Client leave */
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
-        (0, rooms_1.leaveRoom)({ userId: userId, roomId: roomId });
-    });
-    socket.on(RoomEvent_1.RoomEvent.CLIENT_SEND_MSG, function (_a) {
-        var roomId = _a.roomId, msg = _a.msg;
-        /**send Msg to other in the room */
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
-    });
-    /**Video on play */
-    socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
-        var playingVideo = _a.playingVideo, roomId = _a.roomId;
-        //broadcast video to roomID except sender
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_ONPLAY, { playingVideo: playingVideo });
+        socket.leave(roomId);
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.LEFT_ROOM, { userId: userId });
     });
     socket.on(RoomEvent_1.RoomEvent.VIDEO_UPDATING, function (_a) {
         var videoUpdate = _a.videoUpdate, roomId = _a.roomId;
@@ -105,6 +94,8 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         socket.broadcast
             .to(roomId)
             .emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+        //send back to admin
+        socket.emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
     });
 });
 app.use((0, morgan_1.default)("dev"));

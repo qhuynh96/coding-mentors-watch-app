@@ -22,14 +22,16 @@ export interface IRoomActs {
 
 const rooms = new Map<string, IRoom>();
 
-export const setVideoOnPlay = (playingVideo: IVideo, roomId: string) => {
+export const updateVideoOnPlay = async (
+  playingVideo: IVideo,
+  roomId: string
+) => {
   if (rooms.has(roomId)) {
     const room = rooms.get(roomId) as IRoom;
     room.onPlay = playingVideo;
-    const roomInfo = rooms.get(roomId);
-    return roomInfo;
+    return room;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
@@ -41,7 +43,7 @@ export const addVideo = (url: string, roomId: string) => {
     }
     return room;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
@@ -50,7 +52,7 @@ export const getRooms = () => {
     const data = Array.from(rooms.values());
     return data;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
@@ -59,17 +61,16 @@ export const findRoom = (roomId: string) => {
     const room = rooms.get(roomId);
     return room;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
 export const createRoom = (newRoom: IRoom) => {
-  // check if the new room's ID does not already exist
   if (!rooms.has(newRoom.roomId)) {
     rooms.set(newRoom.roomId, newRoom);
     return newRoom;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
@@ -82,7 +83,7 @@ export const joinRoom = ({ userId, roomId }: IRoomActs) => {
     const roomInfo = rooms.get(roomId);
     return roomInfo;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };
 
@@ -95,6 +96,6 @@ export const leaveRoom = ({ userId, roomId }: IRoomActs) => {
     const roomInfo = rooms.get(roomId);
     return roomInfo;
   } else {
-    return createError(404);
+    throw createError(404);
   }
 };

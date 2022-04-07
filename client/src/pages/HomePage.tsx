@@ -6,6 +6,7 @@ import { RoomEvent } from "../RoomEvent";
 import { RoomsContext } from "../context/RoomsContext";
 import videoImg from "../components/video_detail/videoImg.jpg";
 import { serverAxios } from "../api/server";
+
 type Props = {
   socket: Socket;
   auth: string | null | undefined;
@@ -46,14 +47,13 @@ function HomePage({ socket, auth }: Props) {
     } catch (err) {
       setErr(true);
     }
-  }, [inputRoomID, socket, auth, setErr]);
+  }, [inputRoomID, socket, auth, setErr, navigate]);
 
   useEffect(() => {
     socket.on(RoomEvent.CREATED_ROOM, ({ newRoom }) => {
       addNewRoom && addNewRoom(newRoom);
     });
-    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomInfo }) => {});
-  }, [addNewRoom, getRooms, socket]);
+  }, [addNewRoom, socket]);
 
   return (
     <div

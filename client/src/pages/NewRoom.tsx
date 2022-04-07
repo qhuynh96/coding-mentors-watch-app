@@ -16,6 +16,7 @@ import { RoomEvent } from "../RoomEvent";
 import { Avatar, AvatarGroup, Button } from "@mui/material";
 import ChatBox from "../components/chat_box/ChatBox";
 import { useNavigate } from "react-router-dom";
+import { serverAxios } from "../api/server";
 import { useStorage } from "../hooks/useStorage";
 
 interface IProps {
@@ -40,11 +41,11 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   const location = useLocation();
   const state = location.state as ICustomState;
   const { userId, roomInfo } = state;
+  const [room, setRoom, remove] = useStorage("room", roomInfo);
   const isAdmin = useMemo(
     () => userId === roomInfo.admin,
     [userId, roomInfo.admin]
   );
-  const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
   const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -64,35 +65,50 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     },
     [socket, userId, roomId, setMessages]
   );
+
   const updateVideo = useCallback(
-    (videoUpdate: IVideo) => {
-      setPlayingVideo(videoUpdate);
-      socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
+    async (videoUpdate: IVideo) => {
+      try {
+        const res = await serverAxios.put(
+          `/watch-app/rooms/onPlay/${roomId}`,
+          videoUpdate
+        );
+        setRoom((room) => ({ ...room, onPlay: res.data }));
+        socket.emit(RoomEvent.VIDEO_UPDATING, {
+          videoUpdate: res.data,
+          roomId,
+        });
+      } catch (err) {}
     },
-    [socket, setPlayingVideo, roomId]
+    [setRoom, socket, roomId]
   );
 
-  const leaveRoom = useCallback(() => {
-    removeMsg();
-    navigate("/");
-  }, [navigate, removeMsg]);
+  const leaveRoom = useCallback(async () => {
+    try {
+      const res = await serverAxios.put(
+        `/watch-app/rooms/leave/${roomId}`,
+        userId
+      );
+      remove();
+      socket.emit(RoomEvent.LEAVE_ROOM, { roomId, userId });
+      navigate("/");
+    } catch (err) {}
+  }, [navigate, socket, setRoom, roomId, userId]);
 
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
-      setPlayingVideo(updatedVideo);
+      setRoom((prev) => ({ ...prev, onPlay: updatedVideo }));
     });
-    socket.on(RoomEvent.VIDEO_ONPLAY, ({ playingVideo }) => {
-      setPlayingVideo(playingVideo);
+    socket.on(RoomEvent.JOINED_ROOM, ({ userId }) => {
+      setRoom((prev) => ({ ...prev, members: [...prev!.members!, userId] }));
     });
-    socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
-      console.log(msg);
-      setMessages((prev) => [msg, ...prev!]);
+    socket.on(RoomEvent.LEFT_ROOM, ({ userId }) => {
+      setRoom((prev) => ({
+        ...prev,
+        members: prev!.members!.filter((m) => m !== userId),
+      }));
     });
-  }, [socket, setMessages, setPlayingVideo]);
-
-  useEffect(() => {
-    setPlayingVideo(roomInfo.onPlay);
-  }, [userId, roomInfo.onPlay, setPlayingVideo]);
+  }, [socket, setRoom]);
 
   let searchId: string;
 
@@ -104,12 +120,13 @@ const NewRoom: FC<IProps> = ({ socket }) => {
 
     if (!selectedVideo) {
       setSelectedVideo(searchId);
-      setPlayingVideo({
+      const videoUpdate = {
         url: `${BASE_YOUTUBE_API_URL}${searchId}`,
         playing: true,
         latestUpdateAt: new Date().getTime() / 1000,
         progress: 0,
-      });
+      };
+      updateVideo(videoUpdate);
     } else {
       setVideos([...videos, searchId]);
     }
@@ -138,10 +155,17 @@ const NewRoom: FC<IProps> = ({ socket }) => {
               }}
             >
               <AvatarGroup max={2}>
-                <Avatar>{isAdmin ? "A" : "C"}</Avatar>
-                <Avatar />
-                <Avatar />
-                <Avatar />
+                {room?.members?.map((m, i) => {
+                  if (i === 0) {
+                    return (
+                      <Avatar key={i}>
+                        {i === 0 && (isAdmin ? "A" : "C")}
+                      </Avatar>
+                    );
+                  } else {
+                    return <Avatar key={i} />;
+                  }
+                })}
               </AvatarGroup>
               <Button
                 onClick={leaveRoom}
@@ -159,10 +183,10 @@ const NewRoom: FC<IProps> = ({ socket }) => {
         <div className="ui row">
           <form className="twelve wide column">
             <VideoDetail
-              roomId={roomInfo.roomId}
+              roomId={roomInfo.roomId as string}
               socket={socket}
               isAdmin={isAdmin}
-              playingVideo={playingVideo}
+              playingVideo={room?.onPlay as IVideo}
               updateVideo={updateVideo}
             />
           </form>

@@ -33,7 +33,6 @@ const io = new Server(server, {
 // run once the client connects
 io.on(RoomEvent.connection, (socket: Socket) => {
   const rooms = getRooms();
-  socket.emit(RoomEvent.SERVER_ROOMS, { rooms });
 
   socket.on(RoomEvent.CREATE_ROOM, ({ newRoom }) => {
     // join the new room
@@ -52,23 +51,16 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   });
   //**Client leave */
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
-    leaveRoom({ userId, roomId });
-  });
-
-  socket.on(RoomEvent.CLIENT_SEND_MSG, ({ roomId, msg }) => {
-    /**send Msg to other in the room */
-    socket.broadcast.to(roomId).emit(RoomEvent.CLIENT_GET_MSG, { msg });
-  });
-  /**Video on play */
-  socket.on(RoomEvent.SELECT_VIDEO, ({ playingVideo, roomId }) => {
-    //broadcast video to roomID except sender
-    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, { playingVideo });
+    socket.leave(roomId);
+    socket.broadcast.to(roomId).emit(RoomEvent.LEFT_ROOM, { userId });
   });
   socket.on(RoomEvent.VIDEO_UPDATING, ({ videoUpdate, roomId }) => {
     //broadcast video to roomId except sender
     socket.broadcast
       .to(roomId)
       .emit(RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+    //send back to admin
+    socket.emit(RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
   });
 });
 

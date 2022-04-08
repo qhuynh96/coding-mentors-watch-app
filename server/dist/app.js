@@ -78,6 +78,9 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         });
         // join the new room
         socket.join(roomId);
+        //welcome to the room
+        var msg = { sender: "server", text: "Welcome to Watch-app room" };
+        socket.emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
         // broadcast an new Room except
         socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom, userId: userId });
         // send back to room creator
@@ -88,6 +91,9 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         var res = (0, rooms_1.joinRoom)({ roomId: roomId, userId: userId });
         var roomInfo = res.roomInfo;
         socket.join(roomId);
+        //welcome to the room
+        var msg = { sender: "server", text: "Welcome to Watch-app room" };
+        socket.emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
         // broadcast when a user connects
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { userId: userId, roomInfo: roomInfo });
         // send back to participant
@@ -96,6 +102,11 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         (0, rooms_1.leaveRoom)({ userId: userId, roomId: roomId });
+    });
+    socket.on(RoomEvent_1.RoomEvent.CLIENT_SEND_MSG, function (_a) {
+        var roomId = _a.roomId, msg = _a.msg;
+        /**send Msg to other in the room */
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
     });
     /**Video on play */
     socket.on(RoomEvent_1.RoomEvent.SELECT_VIDEO, function (_a) {
@@ -108,7 +119,9 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         var videoUpdate = _a.videoUpdate, roomId = _a.roomId;
         var res = (0, rooms_1.setVideoOnPlay)(videoUpdate, roomId);
         //broadcast video to roomID except sender
-        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+        socket.broadcast
+            .to(roomId)
+            .emit(RoomEvent_1.RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
     });
 });
 app.use((0, morgan_1.default)("dev"));

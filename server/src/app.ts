@@ -53,7 +53,9 @@ io.on(RoomEvent.connection, (socket: Socket) => {
 
     // join the new room
     socket.join(roomId);
-
+    //welcome to the room
+    const msg = { sender: "server", text: `Welcome to Watch-app room` };
+    socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast an new Room except
     socket.broadcast.emit(RoomEvent.CREATED_ROOM, { newRoom, userId });
     // send back to room creator
@@ -64,6 +66,9 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     const res = joinRoom({ roomId, userId });
     const { roomInfo } = res;
     socket.join(roomId);
+    //welcome to the room
+    const msg = { sender: "server", text: `Welcome to Watch-app room` };
+    socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast when a user connects
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, { userId, roomInfo });
     // send back to participant
@@ -73,17 +78,24 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
     leaveRoom({ userId, roomId });
   });
+
+  socket.on(RoomEvent.CLIENT_SEND_MSG, ({ roomId, msg }) => {
+    /**send Msg to other in the room */
+    socket.broadcast.to(roomId).emit(RoomEvent.CLIENT_GET_MSG, { msg });
+  });
   /**Video on play */
   socket.on(RoomEvent.SELECT_VIDEO, ({ playingVideo, roomId }) => {
     const res = setVideoOnPlay(playingVideo, roomId);
     //broadcast video to roomID except sender
-    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, {playingVideo});
+    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, { playingVideo });
   });
-  socket.on(RoomEvent.VIDEO_UPDATING,({videoUpdate,roomId})=>{
+  socket.on(RoomEvent.VIDEO_UPDATING, ({ videoUpdate, roomId }) => {
     const res = setVideoOnPlay(videoUpdate, roomId);
     //broadcast video to roomID except sender
-    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_UPDATED,{updatedVideo: videoUpdate});
-  })
+    socket.broadcast
+      .to(roomId)
+      .emit(RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+  });
 });
 
 app.use(logger("dev"));
@@ -92,14 +104,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get ("/watch-app/user",(async (req,res)=>{
+app.get("/watch-app/user", (async (req, res) => {
   try {
-      const userId = await uuidv4()
-  res.status(200).json(userId)
+    const userId = await uuidv4();
+    res.status(200).json(userId);
   } catch (err) {
-    throw err
+    throw err;
   }
-}) as RequestHandler)
+}) as RequestHandler);
 
 app.get("/watch-app", ((req, res) => {
   res.status(200).json({

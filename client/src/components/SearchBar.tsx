@@ -30,6 +30,7 @@ const SearchBar = ({ value, handleChange, handleSubmit, ...rest }: IProps) => {
         </div>
         <div className="two wide column">
           <Button
+            type="submit"
             sx={{
               width: "100px",
               color: "black",

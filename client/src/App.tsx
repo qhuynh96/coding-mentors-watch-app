@@ -16,7 +16,7 @@ type Props = {
 function App({ socket }: Props) {
   //store in browser
   const [auth, setAuth] = useStorage("userId", null);
-  const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
+  const { getRooms } = useContext(RoomsContext);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -24,7 +24,7 @@ function App({ socket }: Props) {
       setAuth(res.data);
     };
     getUserId();
-  }, []);
+  }, [setAuth]);
 
   useEffect(() => {
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms }) => {

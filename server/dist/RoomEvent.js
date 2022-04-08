@@ -20,4 +20,6 @@ var RoomEvent;
     RoomEvent["VIDEO_ONPLAY"] = "VIDEO_ONPLAY";
     RoomEvent["VIDEO_UPDATING"] = "VIDEO_UPDATING";
     RoomEvent["VIDEO_UPDATED"] = "VIDEO_UPDATED";
+    RoomEvent["CLIENT_SEND_MSG"] = "CLIENT_SEND_MSG";
+    RoomEvent["CLIENT_GET_MSG"] = "CLIENT_GET_MSG";
 })(RoomEvent = exports.RoomEvent || (exports.RoomEvent = {}));

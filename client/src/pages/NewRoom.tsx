@@ -16,9 +16,15 @@ import { RoomEvent } from "../RoomEvent";
 import { Avatar, AvatarGroup, Button } from "@mui/material";
 import ChatBox from "../components/chat_box/ChatBox";
 import { useNavigate } from "react-router-dom";
+import { useStorage } from "../hooks/useStorage";
 
 interface IProps {
   socket: Socket;
+}
+
+export interface IMsg {
+  sender: string;
+  text: string;
 }
 
 interface ICustomState {
@@ -39,20 +45,37 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     [userId, roomInfo.admin]
   );
   const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
-
   const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
-
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-
-  const updateVideo = useCallback((videoUpdate: IVideo) => {
-    setPlayingVideo(videoUpdate);
-    socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
-  }, []);
+  const [text, setText] = useState<string>("");
+  const [messages, setMessages, removeMsg] = useStorage<IMsg[] | undefined>(
+    "msg",
+    [] as IMsg[]
+  );
+  const sendMsg = useCallback(
+    (text) => {
+      if (text.trim() !== "") {
+        const msg: IMsg = { sender: userId, text };
+        setMessages((prev) => [msg, ...prev!]);
+        socket.emit(RoomEvent.CLIENT_SEND_MSG, { roomId, msg });
+        setText("");
+      }
+    },
+    [socket, userId, roomId, setMessages]
+  );
+  const updateVideo = useCallback(
+    (videoUpdate: IVideo) => {
+      setPlayingVideo(videoUpdate);
+      socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
+    },
+    [socket, setPlayingVideo, roomId]
+  );
 
   const leaveRoom = useCallback(() => {
+    removeMsg();
     navigate("/");
-  }, []);
+  }, [navigate, removeMsg]);
 
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
@@ -61,11 +84,15 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     socket.on(RoomEvent.VIDEO_ONPLAY, ({ playingVideo }) => {
       setPlayingVideo(playingVideo);
     });
-  }, [socket]);
+    socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
+      console.log(msg);
+      setMessages((prev) => [msg, ...prev!]);
+    });
+  }, [socket, setMessages, setPlayingVideo]);
 
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
-  }, [userId, roomInfo.onPlay]);
+  }, [userId, roomInfo.onPlay, setPlayingVideo]);
 
   let searchId: string;
 
@@ -140,7 +167,13 @@ const NewRoom: FC<IProps> = ({ socket }) => {
             />
           </form>
           <div className="four wide column">
-            <ChatBox />
+            <ChatBox
+              userId={userId}
+              text={text}
+              setText={(e) => setText(e.target.value)}
+              messages={messages}
+              sendMsg={sendMsg}
+            />
           </div>
         </div>
         <div className="ui row">

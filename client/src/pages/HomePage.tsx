@@ -8,13 +8,13 @@ import { RoomsContext } from "../context/RoomsContext";
 import videoImg from "../components/video_detail/videoImg.jpg";
 type Props = {
   socket: Socket;
-  auth: string | null;
+  auth: string | null | undefined;
 };
 
 function HomePage({ socket, auth }: Props) {
   const navigate = useNavigate();
   const [inputRoomID, setInputRoomID] = useState<string>("");
-  const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
+  const { getRooms, addNewRoom } = useContext(RoomsContext);
 
   const createRoom = useCallback(() => {
     socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId: auth });

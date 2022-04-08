@@ -16,6 +16,9 @@ export const MsgContainer = styled("div")({
   backgroundColor: "white",
   height: "100%",
   marginBottom: "5px",
+  display: "flex",
+  flexDirection: "column-reverse",
+  overflowY: "scroll",
 });
 
 export const ChatInput = styled(TextField)({
@@ -30,3 +33,18 @@ export const ChatInput = styled(TextField)({
   },
   width: "100%",
 });
+
+export const StyledMsg = styled("div")((props) => ({
+  width: "max-content",
+  maxWidth: "80%",
+  minWidth: "25px",
+  margin: "3px",
+  padding: "3px 6px",
+  borderRadius: "15px",
+  alignSelf: `${props.className === "myMsg" && "end"}`,
+  backgroundColor: `${
+    props.className === "myMsg"
+      ? "rgba(220,229,255,0.8)"
+      : "rgba(239,239,239,0.8)"
+  }`,
+}));

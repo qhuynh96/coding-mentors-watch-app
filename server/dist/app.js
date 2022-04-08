@@ -68,25 +68,31 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     var rooms = (0, rooms_1.getRooms)();
     socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
         var newRoom = _a.newRoom;
-        // join the new room
         socket.join(newRoom.roomId);
+        //welcome client to room
+        var msg = { sender: "server", text: "Welcome to Watch-app room" };
+        socket.emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
         // broadcast an new Room except
         socket.broadcast.emit(RoomEvent_1.RoomEvent.CREATED_ROOM, { newRoom: newRoom });
     });
     socket.on(RoomEvent_1.RoomEvent.JOIN_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         socket.join(roomId);
-        //welcome to the room
+        //welcome client to room
         var msg = { sender: "server", text: "Welcome to Watch-app room" };
         socket.emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
         // broadcast when a user connects
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { roomId: roomId, userId: userId });
     });
-    //**Client leave */
     socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         socket.leave(roomId);
         socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.LEFT_ROOM, { userId: userId });
+    });
+    socket.on(RoomEvent_1.RoomEvent.CLIENT_SEND_MSG, function (_a) {
+        var roomId = _a.roomId, msg = _a.msg;
+        /**send Msg to other in the room */
+        socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
     });
     socket.on(RoomEvent_1.RoomEvent.VIDEO_UPDATING, function (_a) {
         var videoUpdate = _a.videoUpdate, roomId = _a.roomId;

@@ -35,25 +35,33 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   const rooms = getRooms();
 
   socket.on(RoomEvent.CREATE_ROOM, ({ newRoom }) => {
-    // join the new room
     socket.join(newRoom.roomId);
+    //welcome client to room
+    const msg = { sender: "server", text: `Welcome to Watch-app room` };
+    socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast an new Room except
     socket.broadcast.emit(RoomEvent.CREATED_ROOM, { newRoom });
   });
 
   socket.on(RoomEvent.JOIN_ROOM, ({ roomId, userId }: IRoomActs) => {
     socket.join(roomId);
-    //welcome to the room
+    //welcome client to room
     const msg = { sender: "server", text: `Welcome to Watch-app room` };
     socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast when a user connects
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, { roomId, userId });
   });
-  //**Client leave */
+
   socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
     socket.leave(roomId);
     socket.broadcast.to(roomId).emit(RoomEvent.LEFT_ROOM, { userId });
   });
+
+  socket.on(RoomEvent.CLIENT_SEND_MSG, ({ roomId, msg }) => {
+    /**send Msg to other in the room */
+    socket.broadcast.to(roomId).emit(RoomEvent.CLIENT_GET_MSG, { msg });
+  });
+
   socket.on(RoomEvent.VIDEO_UPDATING, ({ videoUpdate, roomId }) => {
     //broadcast video to roomId except sender
     socket.broadcast

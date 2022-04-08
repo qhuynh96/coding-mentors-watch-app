@@ -22,12 +22,10 @@ import { useStorage } from "../hooks/useStorage";
 interface IProps {
   socket: Socket;
 }
-
 export interface IMsg {
   sender: string;
   text: string;
 }
-
 interface ICustomState {
   userId: string;
   roomInfo: RoomProps;
@@ -41,7 +39,11 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   const location = useLocation();
   const state = location.state as ICustomState;
   const { userId, roomInfo } = state;
-  const [room, setRoom, remove] = useStorage("room", roomInfo);
+  const [room, setRoom, removeRoom] = useStorage("room", roomInfo);
+  const [messages, setMessages, removeMsg] = useStorage<IMsg[] | undefined>(
+    "msg",
+    [] as IMsg[]
+  );
   const isAdmin = useMemo(
     () => userId === roomInfo.admin,
     [userId, roomInfo.admin]
@@ -50,10 +52,6 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   const [videos, setVideos] = useState<string[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [text, setText] = useState<string>("");
-  const [messages, setMessages, removeMsg] = useStorage<IMsg[] | undefined>(
-    "message",
-    [] as IMsg[]
-  );
   const sendMsg = useCallback(
     (text) => {
       if (text.trim() !== "") {
@@ -89,11 +87,12 @@ const NewRoom: FC<IProps> = ({ socket }) => {
         `/watch-app/rooms/leave/${roomId}`,
         userId
       );
-      remove();
+      removeRoom();
+      removeMsg();
       socket.emit(RoomEvent.LEAVE_ROOM, { roomId, userId });
       navigate("/");
     } catch (err) {}
-  }, [navigate, socket, setRoom, roomId, userId]);
+  }, [socket, roomId, userId, removeRoom, removeMsg, navigate]);
 
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
@@ -108,7 +107,11 @@ const NewRoom: FC<IProps> = ({ socket }) => {
         members: prev!.members!.filter((m) => m !== userId),
       }));
     });
-  }, [socket, setRoom]);
+    socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
+      console.log(msg);
+      setMessages((prev) => [msg, ...prev!]);
+    });
+  }, [socket, setRoom, setMessages]);
 
   let searchId: string;
 

@@ -1,8 +1,7 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
 import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
-import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../video_control/VideoControl";
 import { useVideoControl } from "../video_control/useVideoControl";

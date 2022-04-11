@@ -16,15 +16,15 @@ type Props = {
 function App({ socket }: Props) {
   //store in browser
   const [auth, setAuth] = useStorage("userId", null);
-  const { rooms, getRooms, addNewRoom } = useContext(RoomsContext);
+  const { getRooms } = useContext(RoomsContext);
 
   useEffect(() => {
     const getUserId = async () => {
-      const res = await serverAxios.get("/watch-app/user");
-      setAuth(res.data);
+      const { data } = await serverAxios.get("/watch-app/user");
+      setAuth(data);
     };
     getUserId();
-  }, []);
+  }, [setAuth]);
 
   useEffect(() => {
     socket.on(RoomEvent.SERVER_ROOMS, ({ rooms }) => {

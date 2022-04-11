@@ -1,0 +1,34 @@
+.video-list-container {
+  padding: 5px;
+  border-radius: 5px;
+  background: rgba(239, 239, 239, 0.8);
+  z-index: 2px;
+  backdrop-filter: blur(5px);
+}
+
+.video-list {
+  width: 100%;
+  height: 80px;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(10, 10%);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(10%, 1fr);
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 10px;
+}
+
+.empty {
+  background-image: url(videos.jpg);
+  background-position: center;
+  background-repeat: repeat;
+}
+
+.video-item {
+  width: 100%;
+}
+
+img {
+  width: 100%;
+}

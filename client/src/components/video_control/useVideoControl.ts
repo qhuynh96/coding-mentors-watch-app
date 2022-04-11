@@ -94,7 +94,7 @@ export const useVideoControl = (
       };
       updateVideo(videoUpdate);
     },
-    [playingVideo, updateVideo, setVideoFigures]
+    [playingVideo, playerRef, updateVideo, setVideoFigures]
   );
 
   const handlePlayPause = useCallback(() => {
@@ -106,7 +106,7 @@ export const useVideoControl = (
       playing: !playingVideo.playing,
     };
     updateVideo(videoUpdate);
-  }, [playingVideo, setVideoFigures]);
+  }, [playingVideo, playerRef, updateVideo]);
 
   const handleProgress = useCallback(
     (changingState: ChangingState) => {
@@ -117,7 +117,7 @@ export const useVideoControl = (
         }));
       }
     },
-    [setVideoFigures]
+    [videoFigures.isSeekingTo, setVideoFigures]
   );
 
   const handleDuration = useCallback(
@@ -132,7 +132,7 @@ export const useVideoControl = (
 
   const handleFullScreen = useCallback(() => {
     videoContainerRef.current && screenful.toggle(videoContainerRef.current);
-  }, []);
+  }, [videoContainerRef]);
   return {
     videoFigures,
     handleMute,

@@ -10,12 +10,21 @@ import { Socket } from "socket.io-client";
 import { useLocation, useParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import VideoDetail from "../components/video_detail/VideoDetail";
-import VideoList from "../components/VideoList";
+import VideoList from "../components/video_list/VideoList";
 import { IVideo, RoomProps } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";
+import { Avatar, AvatarGroup, Button } from "@mui/material";
+import ChatBox from "../components/chat_box/ChatBox";
+import { useNavigate } from "react-router-dom";
+import { useStorage } from "../hooks/useStorage";
 
 interface IProps {
   socket: Socket;
+}
+
+export interface IMsg {
+  sender: string;
+  text: string;
 }
 
 interface ICustomState {
@@ -26,7 +35,7 @@ interface ICustomState {
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
 
 const NewRoom: FC<IProps> = ({ socket }) => {
-  // TODO: define other socket events (for watching Youtube together/chatting)
+  const navigate = useNavigate();
   const { roomId } = useParams();
   const location = useLocation();
   const state = location.state as ICustomState;
@@ -36,16 +45,37 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     [userId, roomInfo.admin]
   );
   const [playingVideo, setPlayingVideo] = useState<IVideo>({} as IVideo);
-
   const [search, setSearch] = useState<string>("");
   const [videos, setVideos] = useState<string[]>([]);
-
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [text, setText] = useState<string>("");
+  const [messages, setMessages, removeMsg] = useStorage<IMsg[] | undefined>(
+    "message",
+    [] as IMsg[]
+  );
+  const sendMsg = useCallback(
+    (text) => {
+      if (text.trim() !== "") {
+        const msg: IMsg = { sender: userId, text };
+        setMessages((prev) => [msg, ...prev!]);
+        socket.emit(RoomEvent.CLIENT_SEND_MSG, { roomId, msg });
+        setText("");
+      }
+    },
+    [socket, userId, roomId, setMessages]
+  );
+  const updateVideo = useCallback(
+    (videoUpdate: IVideo) => {
+      setPlayingVideo(videoUpdate);
+      socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
+    },
+    [socket, setPlayingVideo, roomId]
+  );
 
-  const updateVideo = useCallback((videoUpdate: IVideo) => {
-    setPlayingVideo(videoUpdate);
-    socket.emit(RoomEvent.VIDEO_UPDATING, { videoUpdate, roomId });
-  }, []);
+  const leaveRoom = useCallback(() => {
+    removeMsg();
+    navigate("/");
+  }, [navigate, removeMsg]);
 
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
@@ -54,11 +84,15 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     socket.on(RoomEvent.VIDEO_ONPLAY, ({ playingVideo }) => {
       setPlayingVideo(playingVideo);
     });
-  }, [socket]);
+    socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
+      console.log(msg);
+      setMessages((prev) => [msg, ...prev!]);
+    });
+  }, [socket, setMessages, setPlayingVideo]);
 
   useEffect(() => {
     setPlayingVideo(roomInfo.onPlay);
-  }, [userId,roomInfo.onPlay]);
+  }, [userId, roomInfo.onPlay, setPlayingVideo]);
 
   let searchId: string;
 
@@ -81,23 +115,49 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     }
     setSearch("");
   };
-
+  console.log(messages);
   return (
     <div className="ui segment">
       <div className="ui grid">
-        <div className="ui row">
+        <div
+          className="ui row"
+          style={{ alignItems: "center", justifyContent: "center" }}
+        >
           <SearchBar
             handleChange={setSearch}
-            className="ui fluid input"
+            className="ui fluid input "
             handleSubmit={handleSubmit}
             value={search}
           />
-          <div className="six wide column">
-            <button className="ui  fluid  button">Menu</button>
+          <div className="four wide column">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <AvatarGroup max={2}>
+                <Avatar>{isAdmin ? "A" : "C"}</Avatar>
+                <Avatar />
+                <Avatar />
+                <Avatar />
+              </AvatarGroup>
+              <Button
+                onClick={leaveRoom}
+                sx={{
+                  width: "100px",
+                  color: "black",
+                  backgroundColor: "lightgray",
+                }}
+              >
+                Leave
+              </Button>
+            </div>
           </div>
         </div>
         <div className="ui row">
-          <form className="ten wide column">
+          <form className="twelve wide column">
             <VideoDetail
               roomId={roomInfo.roomId}
               socket={socket}
@@ -106,27 +166,19 @@ const NewRoom: FC<IProps> = ({ socket }) => {
               updateVideo={updateVideo}
             />
           </form>
-          <div
-            className="four wide column"
-            style={{ border: "1px solid black" }}
-          >
-            <h3>isAdmin: {JSON.stringify(isAdmin)}</h3>
+          <div className="four wide column">
+            <ChatBox
+              userId={userId}
+              text={text}
+              setText={(e) => setText(e.target.value)}
+              messages={messages}
+              sendMsg={sendMsg}
+            />
           </div>
         </div>
-        <div className="ui row ">
-          <div className="ten wide column">
-            <div className="ui row">
-              <h1>Upcoming videos</h1>
-            </div>
-            <div className="ui row">
-              <VideoList video={video} />
-            </div>
-          </div>
-          <div
-            className="four wide column"
-            style={{ border: "1px solid black" }}
-          >
-            <h3>Chat box (room {roomId})</h3>
+        <div className="ui row">
+          <div className="sixteen wide column">
+            <VideoList videos={videos} />
           </div>
         </div>
       </div>

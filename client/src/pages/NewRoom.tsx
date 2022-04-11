@@ -50,7 +50,7 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [text, setText] = useState<string>("");
   const [messages, setMessages, removeMsg] = useStorage<IMsg[] | undefined>(
-    "msg",
+    "message",
     [] as IMsg[]
   );
   const sendMsg = useCallback(
@@ -115,7 +115,7 @@ const NewRoom: FC<IProps> = ({ socket }) => {
     }
     setSearch("");
   };
-
+  console.log(messages);
   return (
     <div className="ui segment">
       <div className="ui grid">

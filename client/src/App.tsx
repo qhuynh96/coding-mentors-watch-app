@@ -20,8 +20,8 @@ function App({ socket }: Props) {
 
   useEffect(() => {
     const getUserId = async () => {
-      const res = await serverAxios.get("/watch-app/user");
-      setAuth(res.data);
+      const { data } = await serverAxios.get("/watch-app/user");
+      setAuth(data);
     };
     getUserId();
   }, [setAuth]);

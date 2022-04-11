@@ -5,7 +5,7 @@ import {
   MsgContainer,
   StyledMsg,
 } from "./styledComponents";
-import React from "react";
+import { ChangeEvent } from "react";
 import { Send } from "@mui/icons-material";
 import { IMsg } from "../../pages/NewRoom";
 
@@ -14,25 +14,23 @@ interface IProps {
   messages: IMsg[] | undefined;
   text: string;
   sendMsg: (msg: string) => void;
-  setText: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setText: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 const ChatBox = ({ messages, text, setText, sendMsg, userId }: IProps) => {
   console.log(messages);
-
   return (
     <ChatBoxContainer>
       <MsgContainer>
-        {messages &&
-          messages.map((m, i) => {
-            return (
-              <StyledMsg
-                key={i}
-                className={userId === m.sender ? "myMsg" : undefined}
-              >
-                {m.text}
-              </StyledMsg>
-            );
-          })}
+        {messages?.map((m, i) => {
+          return (
+            <StyledMsg
+              key={i}
+              className={userId === m.sender ? "myMsg" : undefined}
+            >
+              {m.text}
+            </StyledMsg>
+          );
+        })}
       </MsgContainer>
       <div className="ui row">
         <ChatInput

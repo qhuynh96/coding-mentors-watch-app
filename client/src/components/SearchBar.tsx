@@ -1,4 +1,4 @@
-import React, { FormEvent } from "react";
+import { FormEvent, memo } from "react";
 import { Button, StandardTextFieldProps, TextField } from "@mui/material";
 
 interface IProps extends StandardTextFieldProps {
@@ -45,4 +45,4 @@ const SearchBar = ({ value, handleChange, handleSubmit, ...rest }: IProps) => {
   );
 };
 
-export default React.memo(SearchBar);
+export default memo(SearchBar);

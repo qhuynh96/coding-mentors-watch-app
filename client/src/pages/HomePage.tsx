@@ -79,7 +79,7 @@ function HomePage({ socket, auth }: Props) {
           width: "300px",
           borderRadius: "10px",
           minHeight: "150px",
-          backgroundColor: "rgba(239,239,239,0.5",
+          backgroundColor: "rgba(239,239,239,0.5)",
           zIndex: 2,
           backdropFilter: "blur(5px)",
           display: "grid",

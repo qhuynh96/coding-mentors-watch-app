@@ -88,6 +88,7 @@ export const joinRoom = ({ userId, roomId }: IRoomActs) => {
 };
 
 export const leaveRoom = ({ userId, roomId }: IRoomActs) => {
+  //TODO: Change roomAdmin if admin left
   if (rooms.has(roomId)) {
     const room = rooms.get(roomId) as IRoom;
     if (room.members.some((member) => member === userId)) {

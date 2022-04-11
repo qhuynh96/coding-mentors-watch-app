@@ -91,7 +91,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
     });
     socket.on(RoomEvent_1.RoomEvent.CLIENT_SEND_MSG, function (_a) {
         var roomId = _a.roomId, msg = _a.msg;
-        /**send Msg to other in the room */
+        //send Msg to other in the room
         socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.CLIENT_GET_MSG, { msg: msg });
     });
     socket.on(RoomEvent_1.RoomEvent.VIDEO_UPDATING, function (_a) {

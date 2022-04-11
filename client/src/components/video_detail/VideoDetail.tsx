@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
-import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../video_control/VideoControl";
@@ -10,8 +9,6 @@ import videoImg from "./videoImg.jpg";
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
-  socket: Socket;
-  roomId: string;
   updateVideo: (videoUpdate: IVideo) => void;
 }
 
@@ -27,7 +24,7 @@ const defaultFigures = {
 };
 
 const VideoDetail = (props: IProps) => {
-  const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
+  const { isAdmin, playingVideo, updateVideo } = props;
   const playerRef = useRef<ReactPlayer>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const {
@@ -77,7 +74,7 @@ const VideoDetail = (props: IProps) => {
         playingVideo.progress;
       playerRef.current && playerRef.current.seekTo(processTime, "seconds");
     }
-  }, [playingVideo?.latestUpdateAt, playerRef]);
+  }, [playingVideo, playerRef]);
 
   if (!playingVideo?.url) {
     return (
@@ -104,6 +101,7 @@ const VideoDetail = (props: IProps) => {
         playing={playingVideo.playing}
         onProgress={handleProgress}
         onDuration={handleDuration}
+        //TODO: onEnded= {function play next video}
         volume={videoFigures.volume}
         muted={videoFigures.muted}
         style={{ pointerEvents: "none" }}

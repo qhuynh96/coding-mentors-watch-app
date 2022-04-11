@@ -117,6 +117,7 @@ var joinRoom = function (_a) {
 exports.joinRoom = joinRoom;
 var leaveRoom = function (_a) {
     var userId = _a.userId, roomId = _a.roomId;
+    //TODO: Change roomAdmin if admin left
     if (rooms.has(roomId)) {
         var room = rooms.get(roomId);
         if (room.members.some(function (member) { return member === userId; })) {

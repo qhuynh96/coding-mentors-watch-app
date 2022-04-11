@@ -13,7 +13,6 @@ type Props = {
 };
 
 function App({ socket }: Props) {
-  //store in browser
   const [auth, setAuth] = useStorage("userId", null);
   const { getRooms } = useContext(RoomsContext);
 

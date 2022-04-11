@@ -108,7 +108,6 @@ const NewRoom: FC<IProps> = ({ socket }) => {
       }));
     });
     socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
-      console.log(msg);
       setMessages((prev) => [msg, ...prev!]);
     });
   }, [socket, setRoom, setMessages]);
@@ -117,23 +116,25 @@ const NewRoom: FC<IProps> = ({ socket }) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    searchId = search.includes("&")
-      ? search.split("=")[1].split("&")[0]
-      : search.split("=")[1];
+    if (search.trim() !== "") {
+      searchId = search.includes("&")
+        ? search.split("=")[1].split("&")[0]
+        : search.split("=")[1];
 
-    if (!selectedVideo) {
-      setSelectedVideo(searchId);
-      const videoUpdate = {
-        url: `${BASE_YOUTUBE_API_URL}${searchId}`,
-        playing: true,
-        latestUpdateAt: new Date().getTime() / 1000,
-        progress: 0,
-      };
-      updateVideo(videoUpdate);
-    } else {
-      setVideos([...videos, searchId]);
+      if (!selectedVideo) {
+        setSelectedVideo(searchId);
+        const videoUpdate = {
+          url: `${BASE_YOUTUBE_API_URL}${searchId}`,
+          playing: true,
+          latestUpdateAt: new Date().getTime() / 1000,
+          progress: 0,
+        };
+        updateVideo(videoUpdate);
+      } else {
+        setVideos([...videos, searchId]);
+      }
+      setSearch("");
     }
-    setSearch("");
   };
   console.log(messages);
   return (
@@ -186,8 +187,6 @@ const NewRoom: FC<IProps> = ({ socket }) => {
         <div className="ui row">
           <form className="twelve wide column">
             <VideoDetail
-              roomId={roomInfo.roomId as string}
-              socket={socket}
               isAdmin={isAdmin}
               playingVideo={room?.onPlay as IVideo}
               updateVideo={updateVideo}

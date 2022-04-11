@@ -45,6 +45,11 @@ const VideoControl = (props: IProps) => {
     handleFullScreen,
   } = props;
   const { playedSeconds, muted, volume, duration } = videoFigures;
+  const formatedProgress = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds <= 9 ? `0${seconds}` : seconds}`;
+  };
   return (
     <Grid container>
       {isAdmin && (
@@ -88,7 +93,9 @@ const VideoControl = (props: IProps) => {
             min={0}
             max={100}
           />
-          <Typography sx={{ marginLeft: 2, color: "white" }}>00:00</Typography>
+          <Typography sx={{ marginLeft: 2, color: "white" }}>
+            {formatedProgress(playedSeconds as number)}
+          </Typography>
         </Grid>
         <Grid item xs={1} container justifyContent="end">
           <IconButton onClick={handleFullScreen}>

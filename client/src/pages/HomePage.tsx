@@ -15,7 +15,7 @@ type Props = {
 function HomePage({ socket, auth }: Props) {
   const navigate = useNavigate();
   const [inputRoomID, setInputRoomID] = useState<string>("");
-  const { getRooms, addNewRoom } = useContext(RoomsContext);
+  const { addNewRoom } = useContext(RoomsContext);
   const [err, setErr] = useState<boolean>(false);
   const createRoom = useCallback(async () => {
     try {

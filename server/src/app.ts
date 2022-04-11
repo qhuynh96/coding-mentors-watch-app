@@ -58,7 +58,7 @@ io.on(RoomEvent.connection, (socket: Socket) => {
   });
 
   socket.on(RoomEvent.CLIENT_SEND_MSG, ({ roomId, msg }) => {
-    /**send Msg to other in the room */
+    //send Msg to other in the room
     socket.broadcast.to(roomId).emit(RoomEvent.CLIENT_GET_MSG, { msg });
   });
 

@@ -17,7 +17,6 @@ interface IProps {
   setText: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 const ChatBox = ({ messages, text, setText, sendMsg, userId }: IProps) => {
-  console.log(messages);
   return (
     <ChatBoxContainer>
       <MsgContainer>

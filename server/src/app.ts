@@ -9,7 +9,6 @@ import { RoomEvent } from "./RoomEvent";
 import { v4 as uuidv4 } from "uuid";
 import { createServer } from "http";
 import { IRoomActs } from "./rooms/rooms";
-
 import roomRoute from "./routes/roomsRoute";
 
 const app = express();

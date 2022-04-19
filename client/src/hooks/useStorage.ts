@@ -1,6 +1,5 @@
 import { SetStateAction } from "react";
 import { useState, useEffect, Dispatch, useCallback } from "react";
-import { IRoom } from "../context/RoomsContext";
 
 type SetValue<T> = Dispatch<SetStateAction<T | undefined>>;
 

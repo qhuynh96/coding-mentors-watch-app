@@ -18,4 +18,5 @@ RUN npm i
 
 WORKDIR /cmwa
 EXPOSE 3000
+EXPOSE 5000
 CMD sh launch.sh

@@ -9,6 +9,7 @@ import {
 } from "@mui/icons-material";
 import { IVideoFigures } from "./useVideoControl";
 import { VideoProgressSlider, VolumeSilder } from "./styledComponents";
+import { formatedProgress } from "./utils";
 
 interface IProps {
   isAdmin: boolean;
@@ -45,11 +46,7 @@ const VideoControl = (props: IProps) => {
     handleFullScreen,
   } = props;
   const { playedSeconds, muted, volume, duration } = videoFigures;
-  const formatedProgress = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds <= 9 ? `0${seconds}` : seconds}`;
-  };
+
   return (
     <Grid container>
       {isAdmin && (

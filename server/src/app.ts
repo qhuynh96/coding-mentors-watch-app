@@ -8,7 +8,7 @@ import logger from "morgan";
 import { RoomEvent } from "./RoomEvent";
 import { v4 as uuidv4 } from "uuid";
 import { createServer } from "http";
-import { getRooms, IRoomActs, leaveRoom } from "./rooms/rooms";
+import { IRoomActs } from "./rooms/rooms";
 
 import roomRoute from "./routes/roomsRoute";
 
@@ -32,8 +32,6 @@ const io = new Server(server, {
 
 // run once the client connects
 io.on(RoomEvent.connection, (socket: Socket) => {
-  const rooms = getRooms();
-
   socket.on(RoomEvent.CREATE_ROOM, ({ newRoom }) => {
     socket.join(newRoom.roomId);
     //welcome client to room

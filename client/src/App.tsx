@@ -23,8 +23,8 @@ function App({ socket }: Props) {
     };
 
     const fetchRooms = async () => {
-      const res = await serverAxios.get("/watch-app/rooms/");
-      getRooms && getRooms(res.data);
+      const { data } = await serverAxios.get("/watch-app/rooms/");
+      getRooms && getRooms(data);
     };
     fetchRooms();
     getUserId();

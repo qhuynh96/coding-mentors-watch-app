@@ -19,13 +19,15 @@ function HomePage({ socket, auth }: Props) {
   const [err, setErr] = useState<boolean>(false);
   const createRoom = useCallback(async () => {
     try {
-      const res = await serverAxios.post("watch-app/rooms/", { userId: auth });
-      const newRoom = res.data;
+      const { data } = await serverAxios.post("watch-app/rooms/", {
+        userId: auth,
+      });
+      const newRoom = data;
       addNewRoom && addNewRoom(newRoom);
       navigate(`/room/${newRoom.roomId}`, {
         state: { userId: auth, roomInfo: newRoom },
       });
-      socket.emit(RoomEvent.CREATE_ROOM, { newRoom: res.data, userId: auth });
+      socket.emit(RoomEvent.CREATE_ROOM, { newRoom: data, userId: auth });
     } catch (err) {
       setErr(true);
     }
@@ -33,10 +35,13 @@ function HomePage({ socket, auth }: Props) {
 
   const joinRoom = useCallback(async () => {
     try {
-      const res = await serverAxios.put(`watch-app/rooms/join/${inputRoomID}`, {
-        userId: auth,
-      });
-      const roomInfo = res.data;
+      const { data } = await serverAxios.put(
+        `watch-app/rooms/join/${inputRoomID}`,
+        {
+          userId: auth,
+        }
+      );
+      const roomInfo = data;
       navigate(`/room/${roomInfo.roomId}`, {
         state: { userId: auth, roomInfo },
       });

@@ -18,7 +18,6 @@ router.post("/", (async (req, res) => {
   const userId = req.body.userId;
   const newRoom = {
     roomId: uuidv4(),
-
     admin: userId,
     members: [userId],
     onPlay: {} as IVideo,

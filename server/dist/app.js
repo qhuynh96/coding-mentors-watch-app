@@ -49,7 +49,6 @@ var morgan_1 = __importDefault(require("morgan"));
 var RoomEvent_1 = require("./RoomEvent");
 var uuid_1 = require("uuid");
 var http_1 = require("http");
-var rooms_1 = require("./rooms/rooms");
 var roomsRoute_1 = __importDefault(require("./routes/roomsRoute"));
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)({
@@ -65,7 +64,6 @@ var io = new socket_io_1.Server(server, {
 });
 // run once the client connects
 io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
-    var rooms = (0, rooms_1.getRooms)();
     socket.on(RoomEvent_1.RoomEvent.CREATE_ROOM, function (_a) {
         var newRoom = _a.newRoom;
         socket.join(newRoom.roomId);

@@ -7,15 +7,14 @@ import {
   useEffect,
 } from "react";
 import { Socket } from "socket.io-client";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import VideoDetail from "../components/video_detail/VideoDetail";
 import VideoList from "../components/video_list/VideoList";
-import { IVideo, RoomProps } from "../context/RoomsContext";
+import { IVideo, IRoom } from "../context/RoomsContext";
 import { RoomEvent } from "../RoomEvent";
 import { Avatar, AvatarGroup, Button } from "@mui/material";
 import ChatBox from "../components/chat_box/ChatBox";
-import { useNavigate } from "react-router-dom";
 import { serverAxios } from "../api/server";
 import { useStorage } from "../hooks/useStorage";
 
@@ -28,7 +27,7 @@ export interface IMsg {
 }
 interface ICustomState {
   userId: string;
-  roomInfo: RoomProps;
+  roomInfo: IRoom;
 }
 
 const BASE_YOUTUBE_API_URL = "https://www.youtube.com/embed/";
@@ -67,13 +66,13 @@ const NewRoom: FC<IProps> = ({ socket }) => {
   const updateVideo = useCallback(
     async (videoUpdate: IVideo) => {
       try {
-        const res = await serverAxios.put(
+        const { data } = await serverAxios.put(
           `/watch-app/rooms/onPlay/${roomId}`,
           videoUpdate
         );
-        setRoom((room) => ({ ...room, onPlay: res.data }));
+        setRoom((prev) => ({ ...prev!, onPlay: data }));
         socket.emit(RoomEvent.VIDEO_UPDATING, {
-          videoUpdate: res.data,
+          videoUpdate: data,
           roomId,
         });
       } catch (err) {}
@@ -83,10 +82,7 @@ const NewRoom: FC<IProps> = ({ socket }) => {
 
   const leaveRoom = useCallback(async () => {
     try {
-      const res = await serverAxios.put(
-        `/watch-app/rooms/leave/${roomId}`,
-        userId
-      );
+      await serverAxios.put(`/watch-app/rooms/leave/${roomId}`, userId);
       removeRoom();
       removeMsg();
       socket.emit(RoomEvent.LEAVE_ROOM, { roomId, userId });
@@ -96,15 +92,15 @@ const NewRoom: FC<IProps> = ({ socket }) => {
 
   useEffect(() => {
     socket.on(RoomEvent.VIDEO_UPDATED, ({ updatedVideo }) => {
-      setRoom((prev) => ({ ...prev, onPlay: updatedVideo }));
+      setRoom((prev) => ({ ...prev!, onPlay: updatedVideo }));
     });
     socket.on(RoomEvent.JOINED_ROOM, ({ userId }) => {
-      setRoom((prev) => ({ ...prev, members: [...prev!.members!, userId] }));
+      setRoom((prev) => ({ ...prev!, members: [...prev!.members, userId] }));
     });
     socket.on(RoomEvent.LEFT_ROOM, ({ userId }) => {
       setRoom((prev) => ({
-        ...prev,
-        members: prev!.members!.filter((m) => m !== userId),
+        ...prev!,
+        members: prev!.members.filter((m) => m !== userId),
       }));
     });
     socket.on(RoomEvent.CLIENT_GET_MSG, ({ msg }) => {
@@ -136,7 +132,6 @@ const NewRoom: FC<IProps> = ({ socket }) => {
       setSearch("");
     }
   };
-  console.log(messages);
   return (
     <div className="ui segment">
       <div className="ui grid">

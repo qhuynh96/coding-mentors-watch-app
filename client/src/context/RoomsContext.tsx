@@ -7,34 +7,34 @@ export interface IVideo {
   latestUpdateAt: number; // (second) start, seekTo, play & pause
   progress: number; // (second) video progress at latestUpdate
 }
-export interface RoomProps {
-  roomId?: string;
-  admin?: string;
-  members?: string[];
-  onPlay?: IVideo;
-  videos?: string[];
+export interface IRoom {
+  roomId: string;
+  admin: string;
+  members: string[];
+  onPlay: IVideo;
+  videos: string[];
 }
 
 interface RoomsContextInterface {
-  rooms?: RoomProps[];
-  getRooms?: (rooms: RoomProps[]) => void;
-  addNewRoom?: (room: RoomProps) => void;
+  rooms?: IRoom[];
+  getRooms?: (rooms: IRoom[]) => void;
+  addNewRoom?: (room: IRoom) => void;
 }
 
 export const RoomsContext = createContext<RoomsContextInterface>({});
 
 export const RoomsContextProvider: FC<ReactNode> = ({ children }) => {
-  const [rooms, setRooms] = useState<RoomProps[]>([]);
+  const [rooms, setRooms] = useState<IRoom[]>([]);
 
   const getRooms = useCallback(
-    (rooms: RoomProps[]) => {
+    (rooms: IRoom[]) => {
       setRooms(rooms);
     },
     [setRooms]
   );
 
   const addNewRoom = useCallback(
-    (room: RoomProps) => {
+    (room: IRoom) => {
       setRooms((prev) => [...prev, room]);
     },
     [setRooms]

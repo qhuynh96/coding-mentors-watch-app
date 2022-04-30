@@ -82,7 +82,7 @@ io.on(RoomEvent_1.RoomEvent.connection, function (socket) {
         // broadcast when a user connects
         socket.broadcast.emit(RoomEvent_1.RoomEvent.JOINED_ROOM, { roomId: roomId, userId: userId });
     });
-    socket.on(RoomEvent_1.RoomEvent.LEAVE_ROOM, function (_a) {
+    socket.on(RoomEvent_1.RoomEvent.LEAVING_ROOM, function (_a) {
         var roomId = _a.roomId, userId = _a.userId;
         socket.leave(roomId);
         socket.broadcast.to(roomId).emit(RoomEvent_1.RoomEvent.LEFT_ROOM, { userId: userId });

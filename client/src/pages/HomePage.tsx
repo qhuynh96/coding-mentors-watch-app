@@ -54,12 +54,6 @@ function HomePage({ socket, auth }: Props) {
     }
   }, [inputRoomID, socket, auth, setErr, navigate]);
 
-  useEffect(() => {
-    socket.on(RoomEvent.CREATED_ROOM, ({ newRoom }) => {
-      addNewRoom && addNewRoom(newRoom);
-    });
-  }, [addNewRoom, socket]);
-
   return (
     <div
       style={{

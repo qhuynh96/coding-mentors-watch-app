@@ -16,12 +16,14 @@ export interface IRoom {
 }
 
 interface RoomsContextInterface {
-  rooms?: IRoom[];
-  getRooms?: (rooms: IRoom[]) => void;
-  addNewRoom?: (room: IRoom) => void;
+  rooms: IRoom[];
+  getRooms: (rooms: IRoom[]) => void;
+  addNewRoom: (room: IRoom) => void;
 }
 
-export const RoomsContext = createContext<RoomsContextInterface>({});
+export const RoomsContext = createContext<RoomsContextInterface>(
+  {} as RoomsContextInterface
+);
 
 export const RoomsContextProvider: FC<ReactNode> = ({ children }) => {
   const [rooms, setRooms] = useState<IRoom[]>([]);

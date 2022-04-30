@@ -76,7 +76,7 @@ const VideoDetail = (props: IProps) => {
     }
   }, [playingVideo, playerRef]);
 
-  if (!playingVideo?.url) {
+  if (!playingVideo.url) {
     return (
       <div
         className="ui embed "

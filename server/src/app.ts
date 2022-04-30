@@ -49,7 +49,7 @@ io.on(RoomEvent.connection, (socket: Socket) => {
     socket.broadcast.emit(RoomEvent.JOINED_ROOM, { roomId, userId });
   });
 
-  socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
+  socket.on(RoomEvent.LEAVING_ROOM, ({ roomId, userId }: IRoomActs) => {
     socket.leave(roomId);
     socket.broadcast.to(roomId).emit(RoomEvent.LEFT_ROOM, { userId });
   });

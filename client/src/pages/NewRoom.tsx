@@ -85,7 +85,7 @@ const NewRoom: FC<IProps> = ({ socket }) => {
       await serverAxios.put(`/watch-app/rooms/leave/${roomId}`, userId);
       removeRoom();
       removeMsg();
-      socket.emit(RoomEvent.LEAVE_ROOM, { roomId, userId });
+      socket.emit(RoomEvent.LEAVING_ROOM, { roomId, userId });
       navigate("/");
     } catch (err) {}
   }, [socket, roomId, userId, removeRoom, removeMsg, navigate]);

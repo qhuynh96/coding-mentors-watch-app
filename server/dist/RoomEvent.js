@@ -13,7 +13,7 @@ var RoomEvent;
     RoomEvent["CREATE_ROOM"] = "CREATE_ROOM";
     RoomEvent["JOIN_ROOM"] = "JOIN_ROOM";
     RoomEvent["JOINED_ROOM"] = "JOINED_ROOM";
-    RoomEvent["LEAVE_ROOM"] = "LEAVE_ROOM";
+    RoomEvent["LEAVING_ROOM"] = "LEAVING_ROOM";
     RoomEvent["LEFT_ROOM"] = "LEFT_ROOM";
     RoomEvent["CREATED_ROOM"] = "CREATED_ROOM";
     RoomEvent["VIDEO_UPDATING"] = "VIDEO_UPDATING";

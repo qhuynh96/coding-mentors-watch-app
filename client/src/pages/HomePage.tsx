@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { Socket } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button } from "@mui/material";
 import { RoomEvent } from "../RoomEvent";
 import { RoomsContext } from "../context/RoomsContext";
 import videoImg from "../components/video_detail/videoImg.jpg";
+import { serverAxios } from "../api/server";
+
 type Props = {
   socket: Socket;
   auth: string | null | undefined;
@@ -14,32 +15,44 @@ type Props = {
 function HomePage({ socket, auth }: Props) {
   const navigate = useNavigate();
   const [inputRoomID, setInputRoomID] = useState<string>("");
-  const { getRooms, addNewRoom } = useContext(RoomsContext);
-
-  const createRoom = useCallback(() => {
-    socket.emit(RoomEvent.CREATE_ROOM, { roomId: uuidv4(), userId: auth });
-  }, [socket, auth]);
-
-  const joinRoom = useCallback(() => {
-    socket.emit(RoomEvent.JOIN_ROOM, { roomId: inputRoomID, userId: auth });
-  }, [inputRoomID, socket, auth]);
-
-  useEffect(() => {
-    socket.on(RoomEvent.CREATED_ROOM, ({ userId, newRoom }) => {
+  const { addNewRoom } = useContext(RoomsContext);
+  const [err, setErr] = useState<boolean>(false);
+  const createRoom = useCallback(async () => {
+    try {
+      const { data } = await serverAxios.post("watch-app/rooms/", {
+        userId: auth,
+      });
+      const newRoom = data;
       addNewRoom && addNewRoom(newRoom);
+      navigate(`/room/${newRoom.roomId}`, {
+        state: { userId: auth, roomInfo: newRoom },
+      });
+      socket.emit(RoomEvent.CREATE_ROOM, { newRoom: data, userId: auth });
+    } catch (err) {
+      setErr(true);
+    }
+  }, [socket, auth, addNewRoom, navigate]);
 
-      auth === userId &&
-        navigate(`/room/${newRoom.roomId}`, {
-          state: { userId, roomInfo: newRoom },
-        });
-    });
-
-    socket.on(RoomEvent.JOINED_ROOM, ({ userId, roomInfo }) => {
-      // TODOs: add roomInfo into context for homepage display
-      auth === userId &&
-        navigate(`/room/${roomInfo.roomId}`, { state: { userId, roomInfo } });
-    });
-  }, [addNewRoom, getRooms, socket, navigate, auth]);
+  const joinRoom = useCallback(async () => {
+    try {
+      const { data } = await serverAxios.put(
+        `watch-app/rooms/join/${inputRoomID}`,
+        {
+          userId: auth,
+        }
+      );
+      const roomInfo = data;
+      navigate(`/room/${roomInfo.roomId}`, {
+        state: { userId: auth, roomInfo },
+      });
+      socket.emit(RoomEvent.JOIN_ROOM, {
+        roomId: roomInfo.roomId,
+        userId: auth,
+      });
+    } catch (err) {
+      setErr(true);
+    }
+  }, [inputRoomID, socket, auth, setErr, navigate]);
 
   return (
     <div

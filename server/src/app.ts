@@ -8,15 +8,8 @@ import logger from "morgan";
 import { RoomEvent } from "./RoomEvent";
 import { v4 as uuidv4 } from "uuid";
 import { createServer } from "http";
-import {
-  createRoom,
-  getRooms,
-  joinRoom,
-  IRoomActs,
-  leaveRoom,
-  setVideoOnPlay,
-  VideoProps,
-} from "./rooms/rooms";
+import { IRoomActs } from "./rooms/rooms";
+import roomRoute from "./routes/roomsRoute";
 
 const app = express();
 
@@ -38,63 +31,41 @@ const io = new Server(server, {
 
 // run once the client connects
 io.on(RoomEvent.connection, (socket: Socket) => {
-  const rooms = getRooms();
-  socket.emit(RoomEvent.SERVER_ROOMS, { rooms });
-
-  socket.on(RoomEvent.CREATE_ROOM, ({ roomId, userId }) => {
-    // create a new room & append it to the current room array
-    const newRoom = createRoom({
-      admin: userId,
-      members: [userId],
-      roomId,
-      onPlay: {} as VideoProps,
-      videos: [] as string[],
-    });
-
-    // join the new room
-    socket.join(roomId);
-    //welcome to the room
+  socket.on(RoomEvent.CREATE_ROOM, ({ newRoom }) => {
+    socket.join(newRoom.roomId);
+    //welcome client to room
     const msg = { sender: "server", text: `Welcome to Watch-app room` };
     socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast an new Room except
-    socket.broadcast.emit(RoomEvent.CREATED_ROOM, { newRoom, userId });
-    // send back to room creator
-    socket.emit(RoomEvent.CREATED_ROOM, { newRoom, userId });
+    socket.broadcast.emit(RoomEvent.CREATED_ROOM, { newRoom });
   });
 
   socket.on(RoomEvent.JOIN_ROOM, ({ roomId, userId }: IRoomActs) => {
-    const res = joinRoom({ roomId, userId });
-    const { roomInfo } = res;
     socket.join(roomId);
-    //welcome to the room
+    //welcome client to room
     const msg = { sender: "server", text: `Welcome to Watch-app room` };
     socket.emit(RoomEvent.CLIENT_GET_MSG, { msg });
     // broadcast when a user connects
-    socket.broadcast.emit(RoomEvent.JOINED_ROOM, { userId, roomInfo });
-    // send back to participant
-    socket.emit(RoomEvent.JOINED_ROOM, { userId, roomInfo });
+    socket.broadcast.emit(RoomEvent.JOINED_ROOM, { roomId, userId });
   });
 
-  socket.on(RoomEvent.LEAVE_ROOM, ({ roomId, userId }: IRoomActs) => {
-    leaveRoom({ userId, roomId });
+  socket.on(RoomEvent.LEAVING_ROOM, ({ roomId, userId }: IRoomActs) => {
+    socket.leave(roomId);
+    socket.broadcast.to(roomId).emit(RoomEvent.LEFT_ROOM, { userId });
   });
 
   socket.on(RoomEvent.CLIENT_SEND_MSG, ({ roomId, msg }) => {
-    /**send Msg to other in the room */
+    //send Msg to other in the room
     socket.broadcast.to(roomId).emit(RoomEvent.CLIENT_GET_MSG, { msg });
   });
-  /**Video on play */
-  socket.on(RoomEvent.SELECT_VIDEO, ({ playingVideo, roomId }) => {
-    setVideoOnPlay(playingVideo, roomId);
-    //broadcast video to roomID except sender
-    socket.broadcast.to(roomId).emit(RoomEvent.VIDEO_ONPLAY, { playingVideo });
-  });
+
   socket.on(RoomEvent.VIDEO_UPDATING, ({ videoUpdate, roomId }) => {
-    setVideoOnPlay(videoUpdate, roomId);
-    //broadcast video to roomID except sender
+    //broadcast video to roomId except sender
     socket.broadcast
       .to(roomId)
       .emit(RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
+    //send back to admin
+    socket.emit(RoomEvent.VIDEO_UPDATED, { updatedVideo: videoUpdate });
   });
 });
 
@@ -104,6 +75,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/watch-app/rooms", roomRoute);
 app.get("/watch-app/user", (async (req, res) => {
   try {
     const userId = uuidv4();

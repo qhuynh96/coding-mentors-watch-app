@@ -1,8 +1,6 @@
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useEffect } from "react";
 import ReactPlayer from "react-player";
-import { Socket } from "socket.io-client";
 import { IVideo } from "../../context/RoomsContext";
-import { RoomEvent } from "../../RoomEvent";
 import { VideoControlWrapper } from "./styledComponents";
 import VideoControl from "../video_control/VideoControl";
 import { useVideoControl } from "../video_control/useVideoControl";
@@ -11,8 +9,6 @@ import videoImg from "./videoImg.jpg";
 interface IProps {
   isAdmin: boolean;
   playingVideo: IVideo;
-  socket: Socket;
-  roomId: string;
   updateVideo: (videoUpdate: IVideo) => void;
 }
 
@@ -28,7 +24,7 @@ const defaultFigures = {
 };
 
 const VideoDetail = (props: IProps) => {
-  const { isAdmin, playingVideo, socket, roomId, updateVideo } = props;
+  const { isAdmin, playingVideo, updateVideo } = props;
   const playerRef = useRef<ReactPlayer>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const {
@@ -50,11 +46,7 @@ const VideoDetail = (props: IProps) => {
     videoContainerRef,
     updateVideo
   );
-  /** latestTimeGetVideo : time users get latest update of movie from server */
-  const latestTimeGetVideo = useMemo<number>(
-    () => new Date().getTime() / 1000,
-    [playingVideo]
-  );
+
   // ProgressTime is the time in second that the video has been progressed.
   // It is calculated from the formula:
   //
@@ -73,14 +65,16 @@ const VideoDetail = (props: IProps) => {
   //                = t2 - t1 + t'1
 
   useEffect(() => {
-    const processTime: ProcessTime =
-      latestTimeGetVideo - playingVideo.latestUpdateAt + playingVideo.progress;
-    playerRef.current && playerRef.current.seekTo(processTime);
-  }, [playingVideo]);
-
-  const onReady = useCallback(() => {
-    socket.emit(RoomEvent.SELECT_VIDEO, { playingVideo, roomId });
-  }, [playingVideo.url]);
+    /** latestTimeGetVideo : time users get latest update of movie from server */
+    if (playingVideo) {
+      const latestTimeGetVideo = new Date().getTime() / 1000;
+      const processTime: ProcessTime =
+        latestTimeGetVideo -
+        playingVideo.latestUpdateAt +
+        playingVideo.progress;
+      playerRef.current && playerRef.current.seekTo(processTime, "seconds");
+    }
+  }, [playingVideo, playerRef]);
 
   if (!playingVideo.url) {
     return (
@@ -105,9 +99,9 @@ const VideoDetail = (props: IProps) => {
         url={playingVideo.url}
         controls={false}
         playing={playingVideo.playing}
-        onReady={onReady}
         onProgress={handleProgress}
         onDuration={handleDuration}
+        //TODO: onEnded= {function play next video}
         volume={videoFigures.volume}
         muted={videoFigures.muted}
         style={{ pointerEvents: "none" }}

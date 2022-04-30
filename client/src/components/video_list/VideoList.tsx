@@ -17,6 +17,7 @@ const VideoList = ({ videos }: IProps) => {
       </h3>
       <div className={`video-list ${videos.length < 1 && "empty"}`}>
         {videos.map((item) => (
+          //TODO: Play next video, onClick
           <div className="video-item" key={item}>
             <img src={getYoutubeThumbnailUrl(item)} alt="" />
           </div>

@@ -1,46 +1,133 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.getRooms = exports.setVideoOnPlay = void 0;
-var rooms = new Map();
-var setVideoOnPlay = function (playingVideo, roomId) {
-    var room = rooms.get(roomId);
-    room.onPlay = playingVideo;
-    return { playingVideo: playingVideo, roomId: roomId };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-exports.setVideoOnPlay = setVideoOnPlay;
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.leaveRoom = exports.joinRoom = exports.createRoom = exports.findRoom = exports.getRooms = exports.addVideo = exports.updateVideoOnPlay = void 0;
+var http_errors_1 = __importDefault(require("http-errors"));
+var rooms = new Map();
+var updateVideoOnPlay = function (playingVideo, roomId) { return __awaiter(void 0, void 0, void 0, function () {
+    var room;
+    return __generator(this, function (_a) {
+        if (rooms.has(roomId)) {
+            room = rooms.get(roomId);
+            room.onPlay = playingVideo;
+            return [2 /*return*/, room];
+        }
+        else {
+            throw (0, http_errors_1.default)(404);
+        }
+        return [2 /*return*/];
+    });
+}); };
+exports.updateVideoOnPlay = updateVideoOnPlay;
+var addVideo = function (url, roomId) {
+    if (rooms.has(roomId)) {
+        var room = rooms.get(roomId);
+        if (!(room === null || room === void 0 ? void 0 : room.videos.some(function (v) { return v === url; }))) {
+            room === null || room === void 0 ? void 0 : room.videos.push(url);
+        }
+        return room;
+    }
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
+};
+exports.addVideo = addVideo;
 var getRooms = function () {
-    return rooms.values();
+    if (rooms) {
+        var data = Array.from(rooms.values());
+        return data;
+    }
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
 };
 exports.getRooms = getRooms;
+var findRoom = function (roomId) {
+    if (rooms.has(roomId)) {
+        var room = rooms.get(roomId);
+        return room;
+    }
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
+};
+exports.findRoom = findRoom;
 var createRoom = function (newRoom) {
-    // check if the new room's ID does not already exist
     if (!rooms.has(newRoom.roomId)) {
         rooms.set(newRoom.roomId, newRoom);
+        return newRoom;
     }
-    /**
-     * TODO: add error handling (case: the ID already exists)
-     * this task is not important in the near future
-     * given how unlikely it is to have duplicate room IDs
-     */
-    return newRoom;
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
 };
 exports.createRoom = createRoom;
 var joinRoom = function (_a) {
     var userId = _a.userId, roomId = _a.roomId;
-    /**
-     * roomId: ID of the room the user wish to join
-     * below, we check if a room with that ID exists
-     * if yes, add the userId to the room's list of members (ie. the user joins the room)
-     */
-    var room = rooms.get(roomId);
-    if (!room.members.some(function (member) { return member === userId; })) {
-        room.members.push(userId);
+    if (rooms.has(roomId)) {
+        var room = rooms.get(roomId);
+        if (!room.members.some(function (member) { return member === userId; })) {
+            room.members.push(userId);
+        }
+        var roomInfo = rooms.get(roomId);
+        return roomInfo;
     }
-    var roomInfo = rooms.get(roomId);
-    return { userId: userId, roomInfo: roomInfo };
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
 };
 exports.joinRoom = joinRoom;
 var leaveRoom = function (_a) {
     var userId = _a.userId, roomId = _a.roomId;
+    //TODO: Change roomAdmin if admin left
+    if (rooms.has(roomId)) {
+        var room = rooms.get(roomId);
+        if (room.members.some(function (member) { return member === userId; })) {
+            room.members.splice(room.members.indexOf(userId), 1);
+        }
+        var roomInfo = rooms.get(roomId);
+        return roomInfo;
+    }
+    else {
+        throw (0, http_errors_1.default)(404);
+    }
 };
 exports.leaveRoom = leaveRoom;

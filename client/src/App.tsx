@@ -7,28 +7,24 @@ import NewRoom from "./pages/NewRoom";
 import NotFound from "./pages/NotFound";
 import { useStorage } from "./hooks/useStorage";
 import { serverAxios } from "./api/server";
+import  useAxios  from "./hooks/useAxios"
+import useGetUserId from "./hooks/useGetUserId"
+import useFetchRooms from "./hooks/useFetchRooms";
 
 type Props = {
   socket: Socket;
 };
 
 function App({ socket }: Props) {
-  const [auth, setAuth] = useStorage("userId", null);
-  const { getRooms } = useContext(RoomsContext);
+  const auth = useGetUserId({
+    method:"get",
+    url:"/watch-app/user"
+  })
 
-  useEffect(() => {
-    const getUserId = async () => {
-      const { data } = await serverAxios.get("/watch-app/user");
-      setAuth(data);
-    };
-
-    const fetchRooms = async () => {
-      const { data } = await serverAxios.get("/watch-app/rooms/");
-      getRooms && getRooms(data);
-    };
-    fetchRooms();
-    getUserId();
-  }, [getRooms, setAuth]);
+  useFetchRooms({
+    method: "get",
+    url:"/watch-app/rooms/"
+  })
 
   return (
     <BrowserRouter>
